@@ -32,4 +32,12 @@ public class Result<T> {
         return new Result<>(resultCode.getCode(), resultCode.getMessage(), null);
     }
 
+    public static <T> Result<T> fail(Integer code, String message) {
+        return new Result<>(code, message, null);
+    }
+
+    public static <T> Result<T> fail(ResultCode resultCode, String message) {
+        return new Result<>(resultCode.getCode(), message, null);
+    }
+
 }
