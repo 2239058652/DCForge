@@ -1,11 +1,15 @@
 package com.forge.dc.note.service.impl;
 
+import com.forge.dc.common.exception.BusinessException;
+import com.forge.dc.common.result.ResultCode;
+import com.forge.dc.note.dto.NoteAddDto;
 import com.forge.dc.note.entity.NoteEntity;
 import com.forge.dc.note.mapper.NoteMapper;
 import com.forge.dc.note.service.NoteService;
 import com.forge.dc.note.vo.NoteListVo;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -28,5 +32,18 @@ public class NoteServiceImpl implements NoteService {
             noteListVo.setUpdatedAt(note.getUpdatedAt());
             return noteListVo;
         }).toList();
+    }
+
+    @Override
+    public void addNote(NoteAddDto note) {
+
+        NoteEntity noteEntity = new NoteEntity();
+        noteEntity.setContent(note.getContent());
+        noteEntity.setCreatedAt(LocalDateTime.now());
+        noteEntity.setUpdatedAt(LocalDateTime.now());
+        int rows = noteMapper.addNote(noteEntity);
+        if (rows <= 0) {
+            throw new BusinessException(ResultCode.SYSTEM_ERROR.getCode(), "新增note失败");
+        }
     }
 }

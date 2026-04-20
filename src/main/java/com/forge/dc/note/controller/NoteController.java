@@ -1,13 +1,13 @@
 package com.forge.dc.note.controller;
 
 import com.forge.dc.common.result.Result;
+import com.forge.dc.note.dto.NoteAddDto;
 import com.forge.dc.note.service.NoteService;
 import com.forge.dc.note.vo.NoteListVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -30,6 +30,17 @@ public class NoteController {
     @GetMapping("/list")
     public Result<List<NoteListVo>> findAllNotesList() {
         return Result.success(noteService.findNotesAll());
+    }
+
+    /**
+     * 新增note
+     *
+     */
+    @Operation(summary = "新增note")
+    @PostMapping("/add")
+    public Result<Void> addNote(@RequestBody @Valid NoteAddDto note) {
+        noteService.addNote(note);
+        return Result.success();
     }
 
 }
