@@ -10,4 +10,6 @@ public interface NoteService {
     List<NoteListVo> findNotesAll();
 
     void addNote(NoteAddDto noteAddDto);
+
+    void deleteNote(Long id);
 }

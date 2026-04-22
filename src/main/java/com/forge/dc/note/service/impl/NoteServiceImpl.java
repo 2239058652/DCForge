@@ -46,4 +46,12 @@ public class NoteServiceImpl implements NoteService {
             throw new BusinessException(ResultCode.SYSTEM_ERROR.getCode(), "新增note失败");
         }
     }
+
+    @Override
+    public void deleteNote(Long id) {
+        int rows = noteMapper.deleteNoteById(id);
+        if (rows <= 0) {
+            throw new BusinessException(ResultCode.SYSTEM_ERROR.getCode(), "note不存在");
+        }
+    }
 }

@@ -43,4 +43,15 @@ public class NoteController {
         return Result.success();
     }
 
+    /**
+     * 删除note
+     *
+     */
+    @Operation(summary = "删除note")
+    @DeleteMapping("/delete/{id}")
+    public Result<Void> deleteNote(@PathVariable Long id) {
+        noteService.deleteNote(id);
+        return Result.success();
+    }
+
 }
