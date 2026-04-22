@@ -9,5 +9,5 @@ public interface NoteService {
 
     List<NoteListVo> findNotesAll();
 
-    void addNote(NoteAddDto note);
+    void addNote(NoteAddDto noteAddDto);
 }

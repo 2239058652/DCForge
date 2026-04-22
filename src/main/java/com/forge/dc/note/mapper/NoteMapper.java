@@ -10,6 +10,6 @@ public interface NoteMapper {
 
     List<NoteEntity> getNoteList();
 
-    int addNote(NoteEntity note);
+    int addNote(NoteEntity noteEntity);
 
 }

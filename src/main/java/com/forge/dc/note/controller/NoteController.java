@@ -38,8 +38,8 @@ public class NoteController {
      */
     @Operation(summary = "新增note")
     @PostMapping("/add")
-    public Result<Void> addNote(@RequestBody @Valid NoteAddDto note) {
-        noteService.addNote(note);
+    public Result<Void> addNote(@RequestBody @Valid NoteAddDto noteAddDto) {
+        noteService.addNote(noteAddDto);
         return Result.success();
     }
 

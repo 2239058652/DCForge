@@ -35,10 +35,10 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public void addNote(NoteAddDto note) {
+    public void addNote(NoteAddDto noteAddDto) {
 
         NoteEntity noteEntity = new NoteEntity();
-        noteEntity.setContent(note.getContent());
+        noteEntity.setContent(noteAddDto.getContent());
         noteEntity.setCreatedAt(LocalDateTime.now());
         noteEntity.setUpdatedAt(LocalDateTime.now());
         int rows = noteMapper.addNote(noteEntity);
