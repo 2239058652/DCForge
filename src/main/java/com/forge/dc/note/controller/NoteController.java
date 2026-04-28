@@ -84,7 +84,7 @@ public class NoteController {
     @Operation(summary = "分页查询note列表")
     @GetMapping("/page")
     public Result<PageResult<NoteListVo>> findNotesByPage(@Valid NotePageDto notePageDto) {
-        return Result.success(noteService.findNotesByPage(notePageDto.getPageNum(), notePageDto.getPageSize()));
+        return Result.success(noteService.findNotesByPage(notePageDto));
     }
 
 }

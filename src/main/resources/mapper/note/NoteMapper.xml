@@ -46,7 +46,13 @@
 
     <select id="countNotes" resultType="java.lang.Long">
         select count(*) from note
+        <where>
+            <if test="content != null and content != ''">
+                content like concat('%', #{content}, '%')
+            </if>
+        </where>
     </select>
+
     <select id="getNoteListByPage" resultType="com.forge.dc.note.entity.NoteEntity">
         select
         id,
@@ -54,6 +60,11 @@
         created_at,
         updated_at
         from note
+        <where>
+            <if test="content != null and content != ''">
+                content like concat('%', #{content}, '%')
+            </if>
+        </where>
         order by id desc
         limit #{offset}, #{pageSize}
     </select>

@@ -47,13 +47,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Result<Void> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.warn("Method argument not valid exception", e);
         String message = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .findFirst()
                 .map(FieldError::getDefaultMessage)
                 .orElse("输入不合法");
+
+        log.warn("Method argument not valid: {}", message);
+
         return Result.fail(ResultCode.BAD_REQUEST, message);
     }
 

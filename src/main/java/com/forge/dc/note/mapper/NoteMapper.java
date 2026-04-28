@@ -1,9 +1,9 @@
 package com.forge.dc.note.mapper;
 
+import com.forge.dc.note.dto.NotePageDto;
 import com.forge.dc.note.entity.NoteEntity;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -22,8 +22,8 @@ public interface NoteMapper {
 
     int updateNote(NoteEntity noteEntity);
 
-    Long countNotes();
+    Long countNotes(NotePageDto notePageDto);
 
-    List<NoteEntity> getNoteListByPage(@Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
+    List<NoteEntity> getNoteListByPage(NotePageDto notePageDto);
 
 }

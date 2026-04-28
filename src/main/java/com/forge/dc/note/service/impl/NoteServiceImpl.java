@@ -4,6 +4,7 @@ import com.forge.dc.common.exception.BusinessException;
 import com.forge.dc.common.result.PageResult;
 import com.forge.dc.common.result.ResultCode;
 import com.forge.dc.note.dto.NoteAddDto;
+import com.forge.dc.note.dto.NotePageDto;
 import com.forge.dc.note.entity.NoteEntity;
 import com.forge.dc.note.mapper.NoteMapper;
 import com.forge.dc.note.service.NoteService;
@@ -76,14 +77,26 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public PageResult<NoteListVo> findNotesByPage(Integer pageNum, Integer pageSize) {
-        Long total = noteMapper.countNotes();
-        Integer offset = (pageNum - 1) * pageSize;
+    public PageResult<NoteListVo> findNotesByPage(NotePageDto notePageDto) {
+        // 清洗 content 字段：trim 后为空则设为 null
+        String content = notePageDto.getContent();
+        if (content != null) {
+            content = content.trim();          // 去除首尾空格
+            if (content.isEmpty()) {
+                content = null;                // 空字符串或纯空格置为 null
+            }
+            notePageDto.setContent(content);
+        }
 
-        List<NoteEntity> noteEntityList = noteMapper.getNoteListByPage(offset, pageSize);
+        Long total = noteMapper.countNotes(notePageDto);
+
+        Integer offset = (notePageDto.getPageNum() - 1) * notePageDto.getPageSize();
+        notePageDto.setOffset(offset);
+
+        List<NoteEntity> noteEntityList = noteMapper.getNoteListByPage(notePageDto);
         List<NoteListVo> noteListVoList = noteEntityList.stream().map(this::toNoteListVo).toList();
 
-        return new PageResult<>(total, noteListVoList, pageNum, pageSize);
+        return new PageResult<>(total, noteListVoList, notePageDto.getPageNum(), notePageDto.getPageSize());
     }
 
     private NoteListVo toNoteListVo(NoteEntity noteEntity) {

@@ -13,4 +13,7 @@ public class NotePageDto {
     @NotNull(message = "pageSize不能为空")
     @Min(value = 1, message = "pageSize最小为1")
     private Integer pageSize;
+
+    private String content;
+    private Integer offset;
 }
