@@ -1,0 +1,27 @@
+### 获取note列表
+GET http://localhost:5273/notes/list
+
+### 获取note分页列表
+GET http://localhost:5273/notes/page?pageNum=1&pageSize=10&content=+
+
+### 添加note
+POST  http://localhost:5273/notes/add
+Content-Type: application/json
+
+{
+  "content": "第4条note"
+}
+
+### 删除notet通过id
+DELETE http://localhost:5273/notes/delete/3
+
+### 查询note通过id
+GET http://localhost:5273/notes/find/3
+
+### 修改note通过id
+PUT http://localhost:5273/notes/update/3
+Content-Type: application/json
+
+{
+  "content": "第1条note"
+}

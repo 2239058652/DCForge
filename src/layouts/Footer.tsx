@@ -1,34 +1,33 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 const Footer: React.FC = () => {
     const [currentTime, setCurrentTime] = useState(() =>
         new Date().toLocaleTimeString('zh-CN', {
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric'
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
         })
     )
 
     const rafRef = useRef<number>(0)
     const lastUpdateRef = useRef<number>(Date.now())
 
-    const updateTime = () => {
-        const now = Date.now()
-        // 每整秒更新一次（避免每帧都格式化字符串，减少计算）
-        if (now - lastUpdateRef.current >= 1000) {
-            setCurrentTime(
-                new Date().toLocaleTimeString('zh-CN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                })
-            )
-            lastUpdateRef.current = now
-        }
-        rafRef.current = requestAnimationFrame(updateTime)
-    }
-
     useEffect(() => {
+        const updateTime = () => {
+            const now = Date.now()
+            if (now - lastUpdateRef.current >= 1000) {
+                setCurrentTime(
+                    new Date().toLocaleTimeString('zh-CN', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    })
+                )
+                lastUpdateRef.current = now
+            }
+            rafRef.current = requestAnimationFrame(updateTime)
+        }
+
         rafRef.current = requestAnimationFrame(updateTime)
         return () => cancelAnimationFrame(rafRef.current)
     }, [])
@@ -40,16 +39,11 @@ const Footer: React.FC = () => {
     })
 
     return (
-        <footer className="bg-[#1A2B4D] h-12 py-4 text-gray-300">
-            <div className="max-w-[1200px] mx-auto px-8 flex items-center justify-between">
-                <p className="text-sm">© 2025 工业互联网教学实验平台 | 教育部工业互联网实验室</p>
-                <div className="flex items-center gap-4">
-                    <span className="text-sm">技术支持: 中软国际教育</span>
-                    <span className="text-sm">
-                        当前日期: {currentDate} {currentTime}
-                    </span>
-                </div>
-            </div>
+        <footer className="app-footer">
+            <span>Note Matrix 前端模板</span>
+            <span>
+                {currentDate} {currentTime}
+            </span>
         </footer>
     )
 }
