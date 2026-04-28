@@ -5,6 +5,7 @@ import com.forge.dc.common.result.PageResult;
 import com.forge.dc.common.result.ResultCode;
 import com.forge.dc.note.dto.NoteAddDto;
 import com.forge.dc.note.dto.NotePageDto;
+import com.forge.dc.note.dto.NoteUpdateDto;
 import com.forge.dc.note.entity.NoteEntity;
 import com.forge.dc.note.mapper.NoteMapper;
 import com.forge.dc.note.service.NoteService;
@@ -52,13 +53,13 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public void editNote(Long id, NoteAddDto noteAddDto) {
+    public void editNote(Long id, NoteUpdateDto noteUpdateDto) {
         NoteEntity noteEntity = noteMapper.getNoteById(id);
         if (noteEntity == null) {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "note不存在");
         }
 
-        noteEntity.setContent(noteAddDto.getContent());
+        noteEntity.setContent(noteUpdateDto.getContent());
         noteEntity.setUpdatedAt(LocalDateTime.now());
         int rows = noteMapper.updateNote(noteEntity);
         if (rows <= 0) {

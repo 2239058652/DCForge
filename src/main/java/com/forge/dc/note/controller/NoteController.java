@@ -4,6 +4,7 @@ import com.forge.dc.common.result.PageResult;
 import com.forge.dc.common.result.Result;
 import com.forge.dc.note.dto.NoteAddDto;
 import com.forge.dc.note.dto.NotePageDto;
+import com.forge.dc.note.dto.NoteUpdateDto;
 import com.forge.dc.note.service.NoteService;
 import com.forge.dc.note.vo.NoteListVo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -72,8 +73,8 @@ public class NoteController {
      */
     @Operation(summary = "修改note")
     @PutMapping("/update/{id}")
-    public Result<Void> updateNote(@PathVariable Long id, @RequestBody @Valid NoteAddDto noteAddDto) {
-        noteService.editNote(id, noteAddDto);
+    public Result<Void> updateNote(@PathVariable Long id, @RequestBody @Valid NoteUpdateDto noteUpdateDto) {
+        noteService.editNote(id, noteUpdateDto);
         return Result.success();
     }
 
