@@ -1,0 +1,59 @@
+/* 导入字体 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@import 'tailwindcss';
+
+/* 道隶体 */
+@font-face {
+    font-family: 'AlimamaDaoLiTi';
+    src: url('@/assets/fonts/AlimamaDaoLiTi.woff') format('woff');
+    font-display: swap; /* 优化加载体验 */
+}
+
+/* 灵动体 */
+@font-face {
+    font-family: 'AlimamaAgile';
+    src: url('@/assets/fonts/AlimamaAgileVF-Thin.woff') format('woff');
+    font-display: swap;
+    font-weight: 300; /* 指定字重 */
+}
+
+/* 余阳体 */
+@font-face {
+    font-family: 'TsangerYuYangT';
+    src: url('@/assets/fonts/TsangerYuYangT_W03_W03.ttf') format('truetype');
+    font-display: swap;
+}
+
+:root {
+    font-family:
+        'Inter',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 在全局样式或根组件中 */
+html {
+    /* 移动端优先 */
+    font-size: 14px; /* 基准字体 */
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px; /* 平板 */
+    }
+}
+
+@media (min-width: 1024px) {
+    html {
+        font-size: 18px; /* 桌面 */
+    }
+}
