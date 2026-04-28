@@ -1,0 +1,123 @@
+.notes-page {
+    min-height: 100%;
+    padding: 24px;
+}
+
+.notes-container {
+    max-width: 1280px;
+}
+
+.notes-card {
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 12px 34px rgba(15, 23, 42, 0.05);
+}
+
+.notes-hero {
+    padding: 22px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    color: #ffffff;
+    background: #07111f;
+}
+
+.notes-kicker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #67e8f9;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.notes-title {
+    margin: 8px 0 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.notes-desc {
+    margin-top: 8px;
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+.notes-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 110px);
+    gap: 12px;
+}
+
+.notes-stat {
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.notes-stat-label {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.notes-stat-value {
+    margin-top: 6px;
+    color: #67e8f9;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.notes-toolbar {
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.notes-search {
+    width: 420px;
+    max-width: 100%;
+}
+
+.notes-table-wrap {
+    padding: 0 24px 24px;
+}
+
+.notes-table-wrap .ant-table-wrapper {
+    margin-top: 0;
+}
+
+.note-detail-box {
+    padding: 16px;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #0f172a;
+    line-height: 1.7;
+}
+
+.note-detail-meta {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 16px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+@media (max-width: 1024px) {
+    .notes-hero,
+    .notes-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .notes-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}

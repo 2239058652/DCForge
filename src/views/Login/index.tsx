@@ -1,6 +1,7 @@
 import { Icon } from '@iconify/react'
 import { Button, Checkbox, Form, Input } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
+import './index.css'
 
 interface LoginForm {
     username: string

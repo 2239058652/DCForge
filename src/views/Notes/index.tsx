@@ -3,6 +3,7 @@ import { App, Button, Empty, Form, Input, Modal, Popconfirm, Space, Table } from
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table'
 import { useEffect, useState } from 'react'
 import { noteApi, type NoteItem } from '@/api/note'
+import './index.css'
 
 interface NoteForm {
     content: string
