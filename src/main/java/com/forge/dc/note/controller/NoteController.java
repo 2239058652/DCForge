@@ -1,7 +1,9 @@
 package com.forge.dc.note.controller;
 
+import com.forge.dc.common.result.PageResult;
 import com.forge.dc.common.result.Result;
 import com.forge.dc.note.dto.NoteAddDto;
+import com.forge.dc.note.dto.NotePageDto;
 import com.forge.dc.note.service.NoteService;
 import com.forge.dc.note.vo.NoteListVo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,6 +54,37 @@ public class NoteController {
     public Result<Void> deleteNote(@PathVariable Long id) {
         noteService.deleteNote(id);
         return Result.success();
+    }
+
+    /**
+     * 根据id查询note信息
+     *
+     */
+    @Operation(summary = "根据id查询note信息")
+    @GetMapping("/find/{id}")
+    public Result<NoteListVo> findNoteById(@PathVariable Long id) {
+        return Result.success(noteService.findNoteById(id));
+    }
+
+    /**
+     * 修改note
+     *
+     */
+    @Operation(summary = "修改note")
+    @PutMapping("/update/{id}")
+    public Result<Void> updateNote(@PathVariable Long id, @RequestBody @Valid NoteAddDto noteAddDto) {
+        noteService.editNote(id, noteAddDto);
+        return Result.success();
+    }
+
+    /**
+     * 分页查询note列表
+     *
+     */
+    @Operation(summary = "分页查询note列表")
+    @GetMapping("/page")
+    public Result<PageResult<NoteListVo>> findNotesByPage(@Valid NotePageDto notePageDto) {
+        return Result.success(noteService.findNotesByPage(notePageDto.getPageNum(), notePageDto.getPageSize()));
     }
 
 }

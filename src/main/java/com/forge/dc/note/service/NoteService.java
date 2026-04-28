@@ -1,5 +1,6 @@
 package com.forge.dc.note.service;
 
+import com.forge.dc.common.result.PageResult;
 import com.forge.dc.note.dto.NoteAddDto;
 import com.forge.dc.note.vo.NoteListVo;
 
@@ -12,4 +13,10 @@ public interface NoteService {
     void addNote(NoteAddDto noteAddDto);
 
     void deleteNote(Long id);
+
+    void editNote(Long id, NoteAddDto noteAddDto);
+
+    NoteListVo findNoteById(Long id);
+
+    PageResult<NoteListVo> findNotesByPage(Integer pageNum, Integer pageSize);
 }

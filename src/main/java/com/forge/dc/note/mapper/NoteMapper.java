@@ -3,6 +3,7 @@ package com.forge.dc.note.mapper;
 import com.forge.dc.note.entity.NoteEntity;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -16,5 +17,13 @@ public interface NoteMapper {
 
     @Delete("delete from note where id = #{id}")
     int deleteNoteById(Long id);
+
+    NoteEntity getNoteById(Long id);
+
+    int updateNote(NoteEntity noteEntity);
+
+    Long countNotes();
+
+    List<NoteEntity> getNoteListByPage(@Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
 
 }

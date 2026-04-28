@@ -9,7 +9,8 @@ public enum ResultCode {
     BAD_REQUEST(400, "bad request"),
     UNAUTHORIZED(401, "unauthorized"),
     FORBIDDEN(403, "forbidden"),
-    SYSTEM_ERROR(500, "system error");
+    SYSTEM_ERROR(500, "system error"),
+    NOT_FOUND(404, "not found");
 
     private final Integer code;
     private final String message;
