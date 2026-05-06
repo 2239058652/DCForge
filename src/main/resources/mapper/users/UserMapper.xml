@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.forge.dc.users.mapper.UserMapper">
+    <insert id="registerSysUser"
+            parameterType="com.forge.dc.users.entity.SysUserEntity"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        insert into sys_user (username,
+                              password,
+                              nickname,
+                              avatar)
+        values (#{username},
+                #{password},
+                #{nickname},
+                #{avatar})
+    </insert>
+
+    <select id="getUserList" resultType="com.forge.dc.users.entity.SysUserEntity">
+        select id,
+               username,
+               password,
+               nickname,
+               avatar,
+               status,
+               role,
+               created_at,
+               updated_at
+        from sys_user
+        where status = 1
+        order by created_at desc
+    </select>
+</mapper>

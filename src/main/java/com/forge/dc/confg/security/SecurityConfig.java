@@ -21,7 +21,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/notes/**"
+                                "/notes/**",
+                                "/users/**"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .formLogin(AbstractHttpConfigurer::disable); // 关闭默认登录页
