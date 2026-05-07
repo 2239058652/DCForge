@@ -31,6 +31,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void registerUser(UserRegisterDto userRegisterDto) {
+
+        // 判断是否已经存在该用户？
+        checkUsernameUnique(userRegisterDto.getUsername());
+
         SysUserEntity sysUserEntity = new SysUserEntity();
         sysUserEntity.setUsername(userRegisterDto.getUsername());
         sysUserEntity.setPassword(userRegisterDto.getPassword());
@@ -54,5 +58,11 @@ public class UserServiceImpl implements UserService {
         vo.setRole(entity.getRole());
         vo.setCreatedAt(entity.getCreatedAt());
         return vo;
+    }
+
+    private void checkUsernameUnique(String username) {
+        if (userMapper.existsByUsername(username)) {
+            throw new BusinessException(ResultCode.ALREADY_EXISTS.getCode(), "用户名已存在");
+        }
     }
 }

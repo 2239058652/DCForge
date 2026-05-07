@@ -29,4 +29,10 @@
         where status = 1
         order by created_at desc
     </select>
+
+    <select id="existsByUsername" resultType="java.lang.Boolean">
+        select count(1) > 0
+        from sys_user
+        where username = #{username}
+    </select>
 </mapper>

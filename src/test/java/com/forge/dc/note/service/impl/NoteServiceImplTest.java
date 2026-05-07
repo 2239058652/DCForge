@@ -21,6 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -192,7 +193,7 @@ class NoteServiceImplTest {
             ps.setString(1, content);
             return ps;
         }, keyHolder);
-        return keyHolder.getKey().longValue();
+        return Objects.requireNonNull(keyHolder.getKey()).longValue();
     }
 
     private void cleanNoteTable() {

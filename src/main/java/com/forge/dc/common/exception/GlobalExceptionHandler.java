@@ -5,6 +5,7 @@ import com.forge.dc.common.result.ResultCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -31,18 +32,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public Result<Void> handleAccessDeniedException(AccessDeniedException e) {
         log.warn("Access denied", e);
-        return Result.fail(403, "无权限访问");
-    }
-
-    @ExceptionHandler(Exception.class)
-    public Result<Void> handleException(Exception e) {
-        log.error("Unhandled exception", e);
-
-        if (isDevProfile()) {
-            return Result.fail(ResultCode.SYSTEM_ERROR.getCode(), buildDevMessage(e));
-        }
-
-        return Result.fail(ResultCode.SYSTEM_ERROR);
+        return Result.fail(ResultCode.FORBIDDEN, "无权限访问");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -57,6 +47,25 @@ public class GlobalExceptionHandler {
         log.warn("Method argument not valid: {}", message);
 
         return Result.fail(ResultCode.BAD_REQUEST, message);
+    }
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    public Result<Void> handleDuplicateKeyException(DuplicateKeyException e) {
+
+        log.warn("Duplicate key exception", e);
+
+        return Result.fail(ResultCode.ALREADY_EXISTS, "数据已存在，请勿重复提交");
+    }
+
+    @ExceptionHandler(Exception.class)
+    public Result<Void> handleException(Exception e) {
+        log.error("Unhandled exception", e);
+
+        if (isDevProfile()) {
+            return Result.fail(ResultCode.SYSTEM_ERROR.getCode(), buildDevMessage(e));
+        }
+
+        return Result.fail(ResultCode.SYSTEM_ERROR);
     }
 
     private boolean isDevProfile() {

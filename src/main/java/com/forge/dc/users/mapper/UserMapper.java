@@ -11,4 +11,6 @@ public interface UserMapper {
 
     int registerSysUser(SysUserEntity sysUserEntity);
 
+    boolean existsByUsername(String username);
+    
 }
