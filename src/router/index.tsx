@@ -3,6 +3,7 @@ import Layout from '@/layouts'
 import Login from '@/views/Login'
 import NotFound from '@/views/NotFound'
 import Notes from '@/views/Notes'
+import Users from '@/views/Users'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 
 export const routeConfig = processRoutes([
@@ -20,6 +21,14 @@ export const routeConfig = processRoutes([
                 element: <Notes />,
                 meta: {
                     title: 'Note 管理',
+                    requiredAuth: true
+                }
+            },
+            {
+                path: 'users',
+                element: <Users />,
+                meta: {
+                    title: '用户管理',
                     requiredAuth: true
                 }
             }
