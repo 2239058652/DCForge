@@ -1,0 +1,95 @@
+.rbac-page {
+    min-height: 100%;
+    padding: 24px;
+}
+
+.rbac-card {
+    max-width: 1280px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 12px 34px rgba(15, 23, 42, 0.05);
+}
+
+.rbac-hero {
+    padding: 22px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    color: #ffffff;
+    background: #111827;
+}
+
+.rbac-kicker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #86efac;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.rbac-title {
+    margin: 8px 0 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.rbac-desc {
+    margin-top: 8px;
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+.rbac-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 110px);
+    gap: 12px;
+}
+
+.rbac-stat {
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.rbac-stat-label {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.rbac-stat-value {
+    margin-top: 6px;
+    color: #86efac;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.rbac-content {
+    padding: 16px 24px 24px;
+}
+
+.rbac-toolbar {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.rbac-assign {
+    max-width: 720px;
+    padding-top: 8px;
+}
+
+@media (max-width: 1024px) {
+    .rbac-hero {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rbac-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}

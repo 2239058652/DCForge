@@ -1,21 +1,33 @@
 import { Icon } from '@iconify/react'
-import { App, Avatar, Button, Empty, Form, Input, Modal, Space, Table, Tag } from 'antd'
+import { App, Avatar, Button, Empty, Form, Input, Modal, Select, Space, Table, Tag } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { rbacApi, type RoleItem } from '@/api/rbac'
 import { userApi, type UserItem, type UserRegisterPayload } from '@/api/user'
 import './index.css'
+
+interface AssignRoleForm {
+    roleIds: number[]
+}
 
 const Users = () => {
     const { message } = App.useApp()
     const [form] = Form.useForm<UserRegisterPayload>()
+    const [assignForm] = Form.useForm<AssignRoleForm>()
     const [users, setUsers] = useState<UserItem[]>([])
+    const [roles, setRoles] = useState<RoleItem[]>([])
     const [keyword, setKeyword] = useState('')
     const [loading, setLoading] = useState(false)
     const [saving, setSaving] = useState(false)
+    const [assigning, setAssigning] = useState(false)
     const [modalOpen, setModalOpen] = useState(false)
+    const [assignModalOpen, setAssignModalOpen] = useState(false)
     const [detailUser, setDetailUser] = useState<UserItem | null>(null)
+    const [assignUser, setAssignUser] = useState<UserItem | null>(null)
 
-    const fetchUsers = async () => {
+    const roleMap = useMemo(() => new Map(roles.map((role) => [role.roleCode, role])), [roles])
+
+    const fetchUsers = useCallback(async () => {
         setLoading(true)
         try {
             const result = await userApi.list()
@@ -30,11 +42,26 @@ const Users = () => {
         } finally {
             setLoading(false)
         }
-    }
+    }, [message])
+
+    const fetchRoles = useCallback(async () => {
+        try {
+            const result = await rbacApi.roles()
+            if (result.code !== 200) {
+                message.error(result.message || '获取角色列表失败')
+                return
+            }
+
+            setRoles(result.data || [])
+        } catch {
+            message.error('获取角色列表失败')
+        }
+    }, [message])
 
     useEffect(() => {
         fetchUsers()
-    }, [])
+        fetchRoles()
+    }, [fetchRoles, fetchUsers])
 
     const filteredUsers = useMemo(() => {
         const query = keyword.trim().toLowerCase()
@@ -43,16 +70,23 @@ const Users = () => {
         }
 
         return users.filter((user) =>
-            [user.username, user.nickname, user.role].some((value) => value?.toLowerCase().includes(query))
+            [user.username, user.nickname, ...(user.roles || [])].some((value) => value?.toLowerCase().includes(query))
         )
     }, [keyword, users])
 
     const activeTotal = users.filter((user) => user.status === 1).length
-    const adminTotal = users.filter((user) => user.role === 'ADMIN').length
+    const adminTotal = users.filter((user) => user.roles?.includes('ADMIN')).length
 
     const openRegisterModal = () => {
         form.resetFields()
         setModalOpen(true)
+    }
+
+    const openAssignModal = (user: UserItem) => {
+        const roleIds = (user.roles || []).map((roleCode) => roleMap.get(roleCode)?.id).filter((id): id is number => Number.isFinite(id))
+        setAssignUser(user)
+        assignForm.setFieldsValue({ roleIds })
+        setAssignModalOpen(true)
     }
 
     const handleSubmit = async () => {
@@ -83,6 +117,48 @@ const Users = () => {
         }
     }
 
+    const handleAssignRoles = async () => {
+        if (!assignUser) {
+            return
+        }
+
+        const values = await assignForm.validateFields()
+        setAssigning(true)
+        try {
+            const result = await rbacApi.assignUserRoles({
+                userId: assignUser.id,
+                roleIds: values.roleIds
+            })
+
+            if (result.code !== 200) {
+                message.error(result.message || '分配用户角色失败')
+                return
+            }
+
+            message.success('用户角色已更新')
+            setAssignModalOpen(false)
+            setAssignUser(null)
+            await fetchUsers()
+        } catch {
+            message.error('分配用户角色失败')
+        } finally {
+            setAssigning(false)
+        }
+    }
+
+    const renderRoles = (roleCodes?: string[]) => {
+        const currentRoles = roleCodes?.length ? roleCodes : ['USER']
+        return (
+            <Space size={[4, 4]} wrap>
+                {currentRoles.map((roleCode) => (
+                    <Tag key={roleCode} color={roleCode === 'ADMIN' ? 'cyan' : 'blue'}>
+                        {roleMap.get(roleCode)?.roleName || roleCode}
+                    </Tag>
+                ))}
+            </Space>
+        )
+    }
+
     const columns: ColumnsType<UserItem> = [
         {
             title: 'ID',
@@ -104,9 +180,9 @@ const Users = () => {
         },
         {
             title: '角色',
-            dataIndex: 'role',
-            width: 130,
-            render: (value?: string) => <Tag color={value === 'ADMIN' ? 'cyan' : 'blue'}>{value || 'USER'}</Tag>
+            dataIndex: 'roles',
+            width: 220,
+            render: renderRoles
         },
         {
             title: '状态',
@@ -122,11 +198,16 @@ const Users = () => {
         },
         {
             title: '操作',
-            width: 120,
+            width: 180,
             render: (_, record) => (
-                <Button type="link" onClick={() => setDetailUser(record)}>
-                    查看
-                </Button>
+                <Space size="small">
+                    <Button type="link" onClick={() => setDetailUser(record)}>
+                        查看
+                    </Button>
+                    <Button type="link" onClick={() => openAssignModal(record)}>
+                        角色
+                    </Button>
+                </Space>
             )
         }
     ]
@@ -142,7 +223,7 @@ const Users = () => {
                                 User Workspace
                             </div>
                             <h1 className="users-title">用户管理</h1>
-                            <p className="users-desc">管理后端 sys_user 表中的账号、角色和启用状态。</p>
+                            <p className="users-desc">管理后端 sys_user 账号、角色绑定和启用状态。</p>
                         </div>
 
                         <div className="users-stats">
@@ -218,6 +299,31 @@ const Users = () => {
                 </Form>
             </Modal>
 
+            <Modal
+                title="分配用户角色"
+                open={assignModalOpen}
+                okText="保存"
+                cancelText="取消"
+                confirmLoading={assigning}
+                onCancel={() => setAssignModalOpen(false)}
+                onOk={handleAssignRoles}
+                destroyOnHidden
+            >
+                <Form form={assignForm} layout="vertical" className="pt-3">
+                    <Form.Item name="roleIds" label="角色" rules={[{ required: true, message: '请选择角色' }]}>
+                        <Select
+                            mode="multiple"
+                            placeholder="请选择角色"
+                            options={roles.map((role) => ({
+                                label: `${role.roleName} (${role.roleCode})`,
+                                value: role.id,
+                                disabled: role.status !== 1
+                            }))}
+                        />
+                    </Form.Item>
+                </Form>
+            </Modal>
+
             <Modal title="用户详情" open={!!detailUser} footer={null} onCancel={() => setDetailUser(null)} destroyOnHidden>
                 {detailUser && (
                     <div className="user-detail">
@@ -228,7 +334,7 @@ const Users = () => {
                         </div>
                         <div className="user-detail-grid">
                             <span>ID：{detailUser.id}</span>
-                            <span>角色：{detailUser.role || 'USER'}</span>
+                            <span>角色：{(detailUser.roles || ['USER']).join(', ')}</span>
                             <span>状态：{detailUser.status === 1 ? '启用' : '禁用'}</span>
                             <span>创建：{detailUser.createdAt || '-'}</span>
                         </div>

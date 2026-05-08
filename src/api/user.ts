@@ -12,7 +12,7 @@ export interface UserItem {
     nickname?: string
     avatar?: string
     status?: number
-    role?: string
+    roles?: string[]
     createdAt?: string
 }
 
@@ -34,7 +34,8 @@ export interface UserLoginResult {
     username: string
     nickname?: string
     avatar?: string
-    role?: string
+    roles?: string[]
+    permissions?: string[]
 }
 
 export const userApi = {

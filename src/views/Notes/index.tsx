@@ -1,7 +1,7 @@
 import { Icon } from '@iconify/react'
 import { App, Button, Empty, Form, Input, Modal, Popconfirm, Space, Table } from 'antd'
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { noteApi, type NoteItem } from '@/api/note'
 import './index.css'
 
@@ -24,7 +24,7 @@ const Notes = () => {
     const [editingNote, setEditingNote] = useState<NoteItem | null>(null)
     const [detailNote, setDetailNote] = useState<NoteItem | null>(null)
 
-    const fetchNotes = async (nextPageNum = pageNum, nextPageSize = pageSize, nextContent = queryContent) => {
+    const fetchNotes = useCallback(async (nextPageNum: number, nextPageSize: number, nextContent: string) => {
         setLoading(true)
         try {
             const result = await noteApi.page({
@@ -47,11 +47,11 @@ const Notes = () => {
         } finally {
             setLoading(false)
         }
-    }
+    }, [message])
 
     useEffect(() => {
         fetchNotes(1, pageSize, '')
-    }, [])
+    }, [fetchNotes, pageSize])
 
     const openCreateModal = () => {
         setEditingNote(null)

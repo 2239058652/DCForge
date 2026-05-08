@@ -3,6 +3,7 @@ import Layout from '@/layouts'
 import Login from '@/views/Login'
 import NotFound from '@/views/NotFound'
 import Notes from '@/views/Notes'
+import Rbac from '@/views/Rbac'
 import Users from '@/views/Users'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 
@@ -29,6 +30,14 @@ export const routeConfig = processRoutes([
                 element: <Users />,
                 meta: {
                     title: '用户管理',
+                    requiredAuth: true
+                }
+            },
+            {
+                path: 'rbac',
+                element: <Rbac />,
+                meta: {
+                    title: '权限管理',
                     requiredAuth: true
                 }
             }

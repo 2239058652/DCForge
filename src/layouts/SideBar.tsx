@@ -1,23 +1,18 @@
 import { Icon } from '@iconify/react'
 import { ConfigProvider, Menu } from 'antd'
-import type { ItemType } from 'antd/es/menu/interface'
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { routeConfig } from '@/router'
 import { routesToMenuItems } from '@/utils/menu-generator'
 
 const SideBar = () => {
-    const [menuItems, setMenuItems] = useState<ItemType[]>([])
-    const [selectedKey, setSelectedKey] = useState('')
     const location = useLocation()
     const navigate = useNavigate()
-
-    useEffect(() => {
+    const selectedKey = location.pathname.replace('/', '')
+    const menuItems = useMemo(() => {
         const layoutRoute = routeConfig.find((route) => route.name === 'layout')
-        const children = layoutRoute?.children || []
-        setMenuItems(routesToMenuItems(children))
-        setSelectedKey(location.pathname.replace('/', ''))
-    }, [location.pathname])
+        return routesToMenuItems(layoutRoute?.children || [])
+    }, [])
 
     const handleMenuClick = ({ key }: { key: string }) => {
         navigate(`/${key}`)
