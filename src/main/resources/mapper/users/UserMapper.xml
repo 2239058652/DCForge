@@ -35,4 +35,19 @@
         from sys_user
         where username = #{username}
     </select>
+
+    <select id="findByUsername" resultType="com.forge.dc.users.entity.SysUserEntity">
+        select id,
+               username,
+               password,
+               nickname,
+               avatar,
+               status,
+               role,
+               created_at,
+               updated_at
+        from sys_user
+        where username = #{username}
+        limit 1
+    </select>
 </mapper>

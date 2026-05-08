@@ -28,6 +28,10 @@ public class Result<T> {
         return new Result<>(ResultCode.SUCCESS.getCode(), ResultCode.SUCCESS.getMessage(), null);
     }
 
+    public static <T> Result<T> success(String message, T data) {
+        return new Result<>(ResultCode.SUCCESS.getCode(), message, data);
+    }
+
     public static <T> Result<T> fail(ResultCode resultCode) {
         return new Result<>(resultCode.getCode(), resultCode.getMessage(), null);
     }
@@ -39,5 +43,4 @@ public class Result<T> {
     public static <T> Result<T> fail(ResultCode resultCode, String message) {
         return new Result<>(resultCode.getCode(), message, null);
     }
-
 }
