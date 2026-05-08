@@ -10,6 +10,9 @@ import com.forge.dc.note.entity.NoteEntity;
 import com.forge.dc.note.mapper.NoteMapper;
 import com.forge.dc.note.service.NoteService;
 import com.forge.dc.note.vo.NoteListVo;
+import com.forge.dc.security.LoginUser;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,7 +29,7 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public List<NoteListVo> findNotesAll() {
-        List<NoteEntity> noteEntityList = noteMapper.getNoteList();
+        List<NoteEntity> noteEntityList = noteMapper.getNoteList(getCurrentUserId());
         return noteEntityList.stream().map(this::toNoteListVo).toList();
     }
 
@@ -34,6 +37,7 @@ public class NoteServiceImpl implements NoteService {
     public void addNote(NoteAddDto noteAddDto) {
 
         NoteEntity noteEntity = new NoteEntity();
+        noteEntity.setUserId(getCurrentUserId());
         noteEntity.setContent(noteAddDto.getContent());
         noteEntity.setCreatedAt(LocalDateTime.now());
         noteEntity.setUpdatedAt(LocalDateTime.now());
@@ -46,7 +50,7 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public void deleteNote(Long id) {
-        int rows = noteMapper.deleteNoteById(id);
+        int rows = noteMapper.deleteNoteById(id, getCurrentUserId());
         if (rows <= 0) {
             throw new BusinessException(ResultCode.SYSTEM_ERROR.getCode(), "note不存在");
         }
@@ -54,7 +58,7 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public void editNote(Long id, NoteUpdateDto noteUpdateDto) {
-        NoteEntity noteEntity = noteMapper.getNoteById(id);
+        NoteEntity noteEntity = noteMapper.getNoteById(id, getCurrentUserId());
         if (noteEntity == null) {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "note不存在");
         }
@@ -69,7 +73,7 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public NoteListVo findNoteById(Long id) {
-        NoteEntity noteEntity = noteMapper.getNoteById(id);
+        NoteEntity noteEntity = noteMapper.getNoteById(id, getCurrentUserId());
         if (noteEntity == null) {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "note不存在");
         }
@@ -79,6 +83,7 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public PageResult<NoteListVo> findNotesByPage(NotePageDto notePageDto) {
+        Long userId = getCurrentUserId();
         // 清洗 content 字段：trim 后为空则设为 null
         String content = notePageDto.getContent();
         if (content != null) {
@@ -89,15 +94,23 @@ public class NoteServiceImpl implements NoteService {
             notePageDto.setContent(content);
         }
 
-        Long total = noteMapper.countNotes(notePageDto);
+        Long total = noteMapper.countNotes(notePageDto, userId);
 
         Integer offset = (notePageDto.getPageNum() - 1) * notePageDto.getPageSize();
         notePageDto.setOffset(offset);
 
-        List<NoteEntity> noteEntityList = noteMapper.getNoteListByPage(notePageDto);
+        List<NoteEntity> noteEntityList = noteMapper.getNoteListByPage(notePageDto, userId);
         List<NoteListVo> noteListVoList = noteEntityList.stream().map(this::toNoteListVo).toList();
 
         return new PageResult<>(total, noteListVoList, notePageDto.getPageNum(), notePageDto.getPageSize());
+    }
+
+    private Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated() || !(authentication.getPrincipal() instanceof LoginUser loginUser)) {
+            throw new BusinessException(ResultCode.UNAUTHORIZED.getCode(), "unauthorized");
+        }
+        return loginUser.getUserId();
     }
 
     private NoteListVo toNoteListVo(NoteEntity noteEntity) {

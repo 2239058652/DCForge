@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 @Data
 public class NoteEntity {
     private Long id;
+    private Long userId;
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

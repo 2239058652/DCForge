@@ -6,11 +6,13 @@
 
     <insert id="addNote" parameterType="com.forge.dc.note.entity.NoteEntity">
         insert into note (
+        user_id,
         content,
         created_at,
         updated_at
         )
         values (
+        #{userId},
         #{content},
         #{createdAt},
         #{updatedAt}
@@ -22,33 +24,39 @@
         set content = #{content},
         updated_at = #{updatedAt}
         where id = #{id}
+        and user_id = #{userId}
     </update>
 
     <select id="getNoteList" resultType="com.forge.dc.note.entity.NoteEntity">
         select
         id,
+        user_id,
         content,
         created_at,
         updated_at
         from note
+        where user_id = #{userId}
         order by id desc
     </select>
 
     <select id="getNoteById" resultType="com.forge.dc.note.entity.NoteEntity">
         select
         id,
+        user_id,
         content,
         created_at,
         updated_at
         from note
         where id = #{id}
+        and user_id = #{userId}
     </select>
 
     <select id="countNotes" resultType="java.lang.Long">
         select count(*) from note
         <where>
-            <if test="content != null and content != ''">
-                content like concat('%', #{content}, '%')
+            user_id = #{userId}
+            <if test="page.content != null and page.content != ''">
+                and content like concat('%', #{page.content}, '%')
             </if>
         </where>
     </select>
@@ -56,17 +64,19 @@
     <select id="getNoteListByPage" resultType="com.forge.dc.note.entity.NoteEntity">
         select
         id,
+        user_id,
         content,
         created_at,
         updated_at
         from note
         <where>
-            <if test="content != null and content != ''">
-                content like concat('%', #{content}, '%')
+            user_id = #{userId}
+            <if test="page.content != null and page.content != ''">
+                and content like concat('%', #{page.content}, '%')
             </if>
         </where>
         order by id desc
-        limit #{offset}, #{pageSize}
+        limit #{page.offset}, #{page.pageSize}
     </select>
 
 </mapper>
