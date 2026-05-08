@@ -128,10 +128,14 @@
 }
 
 .login-card-title {
-    margin: 8px 0 28px;
+    margin: 8px 0 18px;
     font-size: 24px;
     font-weight: 700;
     color: #0f172a;
+}
+
+.login-mode {
+    margin-bottom: 22px;
 }
 
 .login-options {

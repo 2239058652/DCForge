@@ -23,7 +23,22 @@ export interface UserRegisterPayload {
     avatar?: string
 }
 
+export interface UserLoginPayload {
+    username: string
+    password: string
+}
+
+export interface UserLoginResult {
+    token: string
+    id: number
+    username: string
+    nickname?: string
+    avatar?: string
+    role?: string
+}
+
 export const userApi = {
     list: () => request.get<ApiResult<UserItem[]>>('/users/list'),
-    register: (data: UserRegisterPayload) => request.post<ApiResult<unknown>>('/users/register', data)
+    register: (data: UserRegisterPayload) => request.post<ApiResult<unknown>>('/users/register', data),
+    login: (data: UserLoginPayload) => request.post<ApiResult<UserLoginResult>>('/users/login', data)
 }

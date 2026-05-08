@@ -1,23 +1,88 @@
 import { Icon } from '@iconify/react'
-import { Button, Checkbox, Form, Input } from 'antd'
+import { App, Button, Checkbox, Form, Input, Segmented } from 'antd'
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { userApi, type UserLoginResult, type UserRegisterPayload } from '@/api/user'
 import './index.css'
 
-interface LoginForm {
+interface AuthForm {
     username: string
     password: string
+    confirmPassword?: string
+    nickname?: string
+    avatar?: string
     remember?: boolean
 }
 
+type AuthMode = 'login' | 'register'
+
 const Login = () => {
+    const { message } = App.useApp()
+    const [form] = Form.useForm<AuthForm>()
+    const [mode, setMode] = useState<AuthMode>('login')
+    const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
     const location = useLocation()
     const from = (location.state as { from?: string } | null)?.from || '/notes'
 
-    const handleLogin = (values: LoginForm) => {
+    const saveLogin = (user: UserLoginResult) => {
         const tokenName = import.meta.env.VITE_TOKEN_NAME || 'token'
-        localStorage.setItem(tokenName, `mock-token-${values.username}`)
+        localStorage.setItem(tokenName, user.token)
+        localStorage.setItem('userInfo', JSON.stringify(user))
+    }
+
+    const login = async (username: string, password: string) => {
+        const result = await userApi.login({ username, password })
+        if (result.code !== 200 || !result.data?.token) {
+            message.error(result.message || '登录失败')
+            return false
+        }
+
+        saveLogin(result.data)
+        message.success(result.message || '登录成功')
         navigate(from, { replace: true })
+        return true
+    }
+
+    const handleSubmit = async (values: AuthForm) => {
+        const username = values.username.trim()
+        const password = values.password
+        setLoading(true)
+
+        try {
+            if (mode === 'login') {
+                await login(username, password)
+                return
+            }
+
+            if (values.confirmPassword !== password) {
+                message.error('两次输入的密码不一致')
+                return
+            }
+
+            const payload: UserRegisterPayload = {
+                username,
+                password,
+                nickname: values.nickname?.trim(),
+                avatar: values.avatar?.trim()
+            }
+            const registerResult = await userApi.register(payload)
+            if (registerResult.code !== 200) {
+                message.error(registerResult.message || '注册失败')
+                return
+            }
+
+            await login(username, password)
+        } catch {
+            message.error(mode === 'login' ? '登录失败，请检查后端服务' : '注册失败，请检查后端服务')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleModeChange = (value: string) => {
+        setMode(value as AuthMode)
+        form.resetFields()
     }
 
     return (
@@ -41,9 +106,9 @@ const Login = () => {
 
                 <div className="login-metrics">
                     {[
-                        ['CRUD', 'Create and edit'],
-                        ['Search', 'Quick filtering'],
-                        ['API', 'Ready to wire']
+                        ['Auth', 'Login and register'],
+                        ['Users', 'Account workspace'],
+                        ['API', 'Token ready']
                     ].map(([title, desc]) => (
                         <div key={title} className="login-metric">
                             <div className="login-metric-title">{title}</div>
@@ -55,24 +120,57 @@ const Login = () => {
 
             <section className="login-form-wrap">
                 <div className="login-card">
-                    <div className="login-card-kicker">System Sign In</div>
-                    <h2 className="login-card-title">进入控制台</h2>
+                    <div className="login-card-kicker">System Auth</div>
+                    <h2 className="login-card-title">{mode === 'login' ? '进入控制台' : '创建账号'}</h2>
 
-                    <Form<LoginForm> layout="vertical" initialValues={{ username: 'admin', password: '123456', remember: true }} onFinish={handleLogin}>
+                    <Segmented
+                        block
+                        className="login-mode"
+                        value={mode}
+                        options={[
+                            { label: '登录', value: 'login' },
+                            { label: '注册', value: 'register' }
+                        ]}
+                        onChange={handleModeChange}
+                    />
+
+                    <Form<AuthForm> form={form} layout="vertical" initialValues={{ remember: true }} onFinish={handleSubmit}>
                         <Form.Item name="username" label="账号" rules={[{ required: true, message: '请输入账号' }]}>
-                            <Input size="large" prefix={<Icon icon="solar:user-rounded-linear" />} placeholder="admin" />
+                            <Input size="large" prefix={<Icon icon="solar:user-rounded-linear" />} placeholder="请输入账号" />
                         </Form.Item>
                         <Form.Item name="password" label="密码" rules={[{ required: true, message: '请输入密码' }]}>
-                            <Input.Password size="large" prefix={<Icon icon="solar:password-linear" />} placeholder="123456" />
+                            <Input.Password size="large" prefix={<Icon icon="solar:password-linear" />} placeholder="请输入密码" />
                         </Form.Item>
+
+                        {mode === 'register' && (
+                            <>
+                                <Form.Item name="confirmPassword" label="确认密码" rules={[{ required: true, message: '请再次输入密码' }]}>
+                                    <Input.Password size="large" prefix={<Icon icon="solar:password-linear" />} placeholder="请再次输入密码" />
+                                </Form.Item>
+                                <Form.Item name="nickname" label="昵称">
+                                    <Input size="large" prefix={<Icon icon="solar:user-id-linear" />} placeholder="可选" />
+                                </Form.Item>
+                                <Form.Item name="avatar" label="头像地址">
+                                    <Input size="large" prefix={<Icon icon="solar:gallery-linear" />} placeholder="可选" />
+                                </Form.Item>
+                            </>
+                        )}
+
                         <div className="login-options">
                             <Form.Item name="remember" valuePropName="checked" noStyle>
                                 <Checkbox>保持登录</Checkbox>
                             </Form.Item>
-                            <span className="login-auth-tip">Mock auth</span>
+                            <span className="login-auth-tip">Real API</span>
                         </div>
-                        <Button type="primary" htmlType="submit" size="large" block icon={<Icon icon="solar:login-3-bold" />}>
-                            登录
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            size="large"
+                            block
+                            loading={loading}
+                            icon={<Icon icon={mode === 'login' ? 'solar:login-3-bold' : 'solar:user-plus-rounded-bold'} />}
+                        >
+                            {mode === 'login' ? '登录' : '注册并登录'}
                         </Button>
                     </Form>
                 </div>

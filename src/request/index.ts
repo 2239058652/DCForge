@@ -12,6 +12,13 @@ const instance = axios.create({
 // 请求拦截器
 instance.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
+        const tokenName = import.meta.env.VITE_TOKEN_NAME || 'token'
+        const token = localStorage.getItem(tokenName)
+
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`
+        }
+
         return config
     },
     (err) => Promise.reject(err)

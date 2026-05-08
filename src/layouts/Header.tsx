@@ -1,10 +1,18 @@
 import { Icon } from '@iconify/react'
-import { Button } from 'antd'
+import { Avatar, Button } from 'antd'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
+interface StoredUser {
+    username?: string
+    nickname?: string
+    avatar?: string
+}
+
 const Header: React.FC = () => {
     const navigate = useNavigate()
+    const userInfo = localStorage.getItem('userInfo')
+    const user: StoredUser | null = userInfo ? JSON.parse(userInfo) : null
 
     const handleLogout = () => {
         localStorage.clear()
@@ -20,7 +28,8 @@ const Header: React.FC = () => {
                 Note Matrix
             </div>
             <div className="app-header-user">
-                <span>admin</span>
+                <Avatar size={24} src={user?.avatar} icon={<Icon icon="solar:user-rounded-bold" />} />
+                <span>{user?.nickname || user?.username || 'admin'}</span>
                 <Button size="small" icon={<Icon icon="solar:logout-2-linear" />} onClick={handleLogout}>
                     退出
                 </Button>
