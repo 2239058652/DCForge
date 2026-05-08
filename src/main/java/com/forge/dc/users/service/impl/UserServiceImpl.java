@@ -2,6 +2,7 @@ package com.forge.dc.users.service.impl;
 
 import com.forge.dc.common.exception.BusinessException;
 import com.forge.dc.common.result.ResultCode;
+import com.forge.dc.common.util.JwtUtils;
 import com.forge.dc.users.dto.UserLoginDto;
 import com.forge.dc.users.dto.UserRegisterDto;
 import com.forge.dc.users.entity.SysUserEntity;
@@ -22,10 +23,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
-    public UserServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtils = jwtUtils;
     }
 
 
@@ -80,6 +83,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ResultCode.FORBIDDEN.getCode(), "用户已被禁用");
         }
 
+        String token = jwtUtils.generateToken(user.getId(), user.getUsername(), user.getRole());
 
         UserLoginVO vo = new UserLoginVO();
         vo.setId(user.getId());
@@ -87,9 +91,7 @@ public class UserServiceImpl implements UserService {
         vo.setNickname(user.getNickname());
         vo.setAvatar(user.getAvatar());
         vo.setRole(user.getRole());
-
-        // 这里先临时写死，后面接 JWT 再替换
-        vo.setToken("todo-token");
+        vo.setToken(token);
 
         return vo;
     }
