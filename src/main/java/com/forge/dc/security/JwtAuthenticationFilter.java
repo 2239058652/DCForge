@@ -1,6 +1,7 @@
 package com.forge.dc.security;
 
 import com.forge.dc.common.util.JwtUtils;
+import com.forge.dc.users.mapper.UserMapper;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,17 +14,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
-/**
- * JWT 认证过滤器，每个请求执行一次，负责从 Authorization 头中提取 Token 并设置安全上下文。
- */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
+    private final UserMapper userMapper;
 
-    public JwtAuthenticationFilter(JwtUtils jwtUtils) {
+    public JwtAuthenticationFilter(JwtUtils jwtUtils, UserMapper userMapper) {
         this.jwtUtils = jwtUtils;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -31,36 +32,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        // 1. 获取请求头 Authorization
         String authorization = request.getHeader("Authorization");
-
-        // 2. 如果没有 Authorization 头或不是 Bearer 开头，直接放行（让后续安全机制处理）
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 3. 提取 Token 字符串（去掉 "Bearer " 前缀）
         String token = authorization.substring(7);
-
-        // 4. 验证 Token 有效性（如过期、签名等）
         if (!jwtUtils.validateToken(token)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 5. 解析 Token 中的负载信息
         Claims claims = jwtUtils.parseToken(token);
-
-        // 6. 从 Claims 中获取用户标识及属性
         Long userId = Long.valueOf(claims.getSubject());
         String username = claims.get("username", String.class);
-        String role = claims.get("role", String.class);
+        List<String> roles = userMapper.findRoleCodesByUserId(userId);
+        List<String> permissions = userMapper.findPermissionCodesByUserId(userId);
 
-        // 7. 构造应用内的用户主体对象，包含权限信息
-        LoginUser loginUser = new LoginUser(userId, username, role);
-
-        // 8. 创建 Spring Security 的认证令牌，标记为已认证
+        LoginUser loginUser = new LoginUser(userId, username, roles, permissions);
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
                         loginUser,
@@ -68,10 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         loginUser.getAuthorities()
                 );
 
-        // 9. 将认证信息存入安全上下文，供后续业务获取当前用户
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // 10. 继续执行过滤器链
         filterChain.doFilter(request, response);
     }
 }

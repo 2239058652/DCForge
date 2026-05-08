@@ -3,6 +3,7 @@ package com.forge.dc.users.vo;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class SysUserListVO {
@@ -17,7 +18,7 @@ public class SysUserListVO {
 
     private Integer status;
 
-    private String role;
+    private List<String> roles;
 
     private LocalDateTime createdAt;
 }

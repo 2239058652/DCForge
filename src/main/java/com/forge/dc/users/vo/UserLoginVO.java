@@ -2,6 +2,8 @@ package com.forge.dc.users.vo;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class UserLoginVO {
 
@@ -33,5 +35,7 @@ public class UserLoginVO {
     /**
      * 角色
      */
-    private String role;
+    private List<String> roles;
+
+    private List<String> permissions;
 }

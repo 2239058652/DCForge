@@ -21,6 +21,8 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final String DEFAULT_ROLE_CODE = "USER";
+
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
@@ -30,7 +32,6 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
     }
-
 
     @Override
     public List<SysUserListVO> findUsersAll() {
@@ -42,11 +43,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void registerUser(UserRegisterDto userRegisterDto) {
-
-        // 判断是否已经存在该用户？
         checkUsernameUnique(userRegisterDto.getUsername());
 
-        // 密码加密
         String encodedPassword = passwordEncoder.encode(userRegisterDto.getPassword());
 
         SysUserEntity sysUserEntity = new SysUserEntity();
@@ -55,15 +53,15 @@ public class UserServiceImpl implements UserService {
         sysUserEntity.setAvatar(userRegisterDto.getAvatar());
         sysUserEntity.setNickname(userRegisterDto.getNickname());
 
-
         try {
             int rows = userMapper.registerSysUser(sysUserEntity);
             if (rows <= 0) {
-                throw new BusinessException(ResultCode.SYSTEM_ERROR.getCode(), "新增用户失败");
+                throw new BusinessException(ResultCode.SYSTEM_ERROR.getCode(), "add user failed");
             }
+            bindDefaultRole(sysUserEntity.getId());
         } catch (DuplicateKeyException e) {
-            log.warn("注册用户失败，用户名已存在：{}", userRegisterDto.getUsername(), e);
-            throw new BusinessException(ResultCode.ALREADY_EXISTS.getCode(), "用户名已存在");
+            log.warn("register user failed, username exists: {}", userRegisterDto.getUsername(), e);
+            throw new BusinessException(ResultCode.ALREADY_EXISTS.getCode(), "username already exists");
         }
     }
 
@@ -72,25 +70,28 @@ public class UserServiceImpl implements UserService {
         SysUserEntity user = userMapper.findByUsername(userLoginDto.getUsername());
 
         if (user == null) {
-            throw new BusinessException(ResultCode.BAD_REQUEST.getCode(), "用户名或密码错误");
+            throw new BusinessException(ResultCode.BAD_REQUEST.getCode(), "username or password error");
         }
 
         if (!passwordEncoder.matches(userLoginDto.getPassword(), user.getPassword())) {
-            throw new BusinessException(ResultCode.BAD_REQUEST.getCode(), "用户名或密码错误");
+            throw new BusinessException(ResultCode.BAD_REQUEST.getCode(), "username or password error");
         }
 
         if (user.getStatus() == 0) {
-            throw new BusinessException(ResultCode.FORBIDDEN.getCode(), "用户已被禁用");
+            throw new BusinessException(ResultCode.FORBIDDEN.getCode(), "user disabled");
         }
 
-        String token = jwtUtils.generateToken(user.getId(), user.getUsername(), user.getRole());
+        List<String> roles = userMapper.findRoleCodesByUserId(user.getId());
+        List<String> permissions = userMapper.findPermissionCodesByUserId(user.getId());
+        String token = jwtUtils.generateToken(user.getId(), user.getUsername());
 
         UserLoginVO vo = new UserLoginVO();
         vo.setId(user.getId());
         vo.setUsername(user.getUsername());
         vo.setNickname(user.getNickname());
         vo.setAvatar(user.getAvatar());
-        vo.setRole(user.getRole());
+        vo.setRoles(roles);
+        vo.setPermissions(permissions);
         vo.setToken(token);
 
         return vo;
@@ -103,14 +104,22 @@ public class UserServiceImpl implements UserService {
         vo.setNickname(entity.getNickname());
         vo.setAvatar(entity.getAvatar());
         vo.setStatus(entity.getStatus());
-        vo.setRole(entity.getRole());
+        vo.setRoles(userMapper.findRoleCodesByUserId(entity.getId()));
         vo.setCreatedAt(entity.getCreatedAt());
         return vo;
     }
 
     private void checkUsernameUnique(String username) {
         if (userMapper.existsByUsername(username)) {
-            throw new BusinessException(ResultCode.ALREADY_EXISTS.getCode(), "用户名已存在");
+            throw new BusinessException(ResultCode.ALREADY_EXISTS.getCode(), "username already exists");
         }
+    }
+
+    private void bindDefaultRole(Long userId) {
+        Long roleId = userMapper.findRoleIdByCode(DEFAULT_ROLE_CODE);
+        if (roleId == null) {
+            throw new BusinessException(ResultCode.SYSTEM_ERROR.getCode(), "default role not found");
+        }
+        userMapper.bindUserRole(userId, roleId);
     }
 }

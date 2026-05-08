@@ -5,13 +5,11 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class SysUserEntity {
+public class SysRoleEntity {
 
     private Long id;
-    private String username;
-    private String password;
-    private String nickname;
-    private String avatar;
+    private String roleCode;
+    private String roleName;
     private Integer status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -22,7 +22,6 @@
                nickname,
                avatar,
                status,
-               role,
                created_at,
                updated_at
         from sys_user
@@ -43,11 +42,44 @@
                nickname,
                avatar,
                status,
-               role,
                created_at,
                updated_at
         from sys_user
         where username = #{username}
         limit 1
+    </select>
+
+    <select id="findRoleIdByCode" resultType="java.lang.Long">
+        select id
+        from sys_role
+        where role_code = #{roleCode}
+          and status = 1
+        limit 1
+    </select>
+
+    <insert id="bindUserRole">
+        insert into sys_user_role (user_id, role_id)
+        values (#{userId}, #{roleId})
+    </insert>
+
+    <select id="findRoleCodesByUserId" resultType="java.lang.String">
+        select distinct r.role_code
+        from sys_user_role ur
+                 inner join sys_role r on r.id = ur.role_id
+        where ur.user_id = #{userId}
+          and r.status = 1
+        order by r.id
+    </select>
+
+    <select id="findPermissionCodesByUserId" resultType="java.lang.String">
+        select distinct p.permission_code
+        from sys_user_role ur
+                 inner join sys_role r on r.id = ur.role_id
+                 inner join sys_role_permission rp on rp.role_id = r.id
+                 inner join sys_permission p on p.id = rp.permission_id
+        where ur.user_id = #{userId}
+          and r.status = 1
+          and p.status = 1
+        order by p.id
     </select>
 </mapper>

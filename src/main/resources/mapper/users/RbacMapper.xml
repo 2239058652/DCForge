@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.forge.dc.users.mapper.RbacMapper">
+
+    <select id="findRoles" resultType="com.forge.dc.users.entity.SysRoleEntity">
+        select id,
+               role_code,
+               role_name,
+               status,
+               created_at,
+               updated_at
+        from sys_role
+        order by id
+    </select>
+
+    <insert id="addRole" parameterType="com.forge.dc.users.entity.SysRoleEntity"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into sys_role (role_code, role_name, status)
+        values (#{roleCode}, #{roleName}, #{status})
+    </insert>
+
+    <update id="updateRole" parameterType="com.forge.dc.users.entity.SysRoleEntity">
+        update sys_role
+        set role_code = #{roleCode},
+            role_name = #{roleName},
+            status = #{status}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteRole">
+        delete from sys_role where id = #{id}
+    </delete>
+
+    <select id="findPermissions" resultType="com.forge.dc.users.entity.SysPermissionEntity">
+        select id,
+               permission_code,
+               permission_name,
+               resource_type,
+               path,
+               status,
+               created_at,
+               updated_at
+        from sys_permission
+        order by id
+    </select>
+
+    <insert id="addPermission" parameterType="com.forge.dc.users.entity.SysPermissionEntity"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into sys_permission (permission_code, permission_name, resource_type, path, status)
+        values (#{permissionCode}, #{permissionName}, #{resourceType}, #{path}, #{status})
+    </insert>
+
+    <update id="updatePermission" parameterType="com.forge.dc.users.entity.SysPermissionEntity">
+        update sys_permission
+        set permission_code = #{permissionCode},
+            permission_name = #{permissionName},
+            resource_type = #{resourceType},
+            path = #{path},
+            status = #{status}
+        where id = #{id}
+    </update>
+
+    <delete id="deletePermission">
+        delete from sys_permission where id = #{id}
+    </delete>
+
+    <delete id="deleteUserRoles">
+        delete from sys_user_role where user_id = #{userId}
+    </delete>
+
+    <insert id="addUserRoles">
+        insert into sys_user_role (user_id, role_id)
+        values
+        <foreach collection="roleIds" item="roleId" separator=",">
+            (#{userId}, #{roleId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteRolePermissions">
+        delete from sys_role_permission where role_id = #{roleId}
+    </delete>
+
+    <insert id="addRolePermissions">
+        insert into sys_role_permission (role_id, permission_id)
+        values
+        <foreach collection="permissionIds" item="permissionId" separator=",">
+            (#{roleId}, #{permissionId})
+        </foreach>
+    </insert>
+</mapper>

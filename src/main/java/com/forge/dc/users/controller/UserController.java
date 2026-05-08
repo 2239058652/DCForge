@@ -9,6 +9,7 @@ import com.forge.dc.users.vo.UserLoginVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,6 +42,7 @@ public class UserController {
      */
     @Operation(summary = "查询用户列表（全部）")
     @GetMapping("/list")
+    @PreAuthorize("hasAuthority('user:list')")
     public Result<List<SysUserListVO>> findAllUsersList() {
         return Result.success(userService.findUsersAll());
     }

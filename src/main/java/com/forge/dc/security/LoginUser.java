@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -14,15 +15,21 @@ public class LoginUser {
 
     private final String username;
 
-    private final String role;
+    private final List<String> roles;
 
-    public LoginUser(Long userId, String username, String role) {
+    private final List<String> permissions;
+
+    public LoginUser(Long userId, String username, List<String> roles, List<String> permissions) {
         this.userId = userId;
         this.username = username;
-        this.role = role;
+        this.roles = roles;
+        this.permissions = permissions;
     }
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        roles.forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
+        permissions.forEach(permission -> authorities.add(new SimpleGrantedAuthority(permission)));
+        return authorities;
     }
 }

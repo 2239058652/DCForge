@@ -10,6 +10,7 @@ import com.forge.dc.note.vo.NoteListVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +32,7 @@ public class NoteController {
      */
     @Operation(summary = "查询note列表")
     @GetMapping("/list")
+    @PreAuthorize("hasAuthority('note:list')")
     public Result<List<NoteListVo>> findAllNotesList() {
         return Result.success(noteService.findNotesAll());
     }
@@ -41,6 +43,7 @@ public class NoteController {
      */
     @Operation(summary = "新增note")
     @PostMapping("/add")
+    @PreAuthorize("hasAuthority('note:add')")
     public Result<Void> addNote(@RequestBody @Valid NoteAddDto noteAddDto) {
         noteService.addNote(noteAddDto);
         return Result.success();
@@ -52,6 +55,7 @@ public class NoteController {
      */
     @Operation(summary = "删除note")
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAuthority('note:delete')")
     public Result<Void> deleteNote(@PathVariable Long id) {
         noteService.deleteNote(id);
         return Result.success();
@@ -63,6 +67,7 @@ public class NoteController {
      */
     @Operation(summary = "根据id查询note信息")
     @GetMapping("/find/{id}")
+    @PreAuthorize("hasAuthority('note:detail')")
     public Result<NoteListVo> findNoteById(@PathVariable Long id) {
         return Result.success(noteService.findNoteById(id));
     }
@@ -73,6 +78,7 @@ public class NoteController {
      */
     @Operation(summary = "修改note")
     @PutMapping("/update/{id}")
+    @PreAuthorize("hasAuthority('note:update')")
     public Result<Void> updateNote(@PathVariable Long id, @RequestBody @Valid NoteUpdateDto noteUpdateDto) {
         noteService.editNote(id, noteUpdateDto);
         return Result.success();
@@ -84,6 +90,7 @@ public class NoteController {
      */
     @Operation(summary = "分页查询note列表")
     @GetMapping("/page")
+    @PreAuthorize("hasAuthority('note:list')")
     public Result<PageResult<NoteListVo>> findNotesByPage(@Valid NotePageDto notePageDto) {
         return Result.success(noteService.findNotesByPage(notePageDto));
     }
