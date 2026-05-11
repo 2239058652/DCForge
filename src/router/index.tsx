@@ -4,6 +4,7 @@ import Login from '@/views/Login'
 import NotFound from '@/views/NotFound'
 import Notes from '@/views/Notes'
 import Rbac from '@/views/Rbac'
+import Schedule from '@/views/Schedule'
 import Users from '@/views/Users'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 
@@ -22,6 +23,14 @@ export const routeConfig = processRoutes([
                 element: <Notes />,
                 meta: {
                     title: 'Note 管理',
+                    requiredAuth: true
+                }
+            },
+            {
+                path: 'schedule',
+                element: <Schedule />,
+                meta: {
+                    title: '排班管理',
                     requiredAuth: true
                 }
             },
