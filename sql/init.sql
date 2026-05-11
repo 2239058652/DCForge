@@ -146,3 +146,42 @@ FROM sys_role r
                                                               'note:delete'
     )
 WHERE r.role_code = 'USER';
+
+-- 人员表
+CREATE TABLE staff
+(
+    id          BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name        VARCHAR(50) NOT NULL,
+    type        TINYINT     NOT NULL COMMENT '0=doctor 1=nurse',
+    rest_day    TINYINT     NOT NULL COMMENT '0=周日 1=周一 ... 6=周六',
+    night_order INT         NOT NULL COMMENT '夜班队列序号，同type内唯一',
+    is_active   TINYINT(1)  NOT NULL DEFAULT 1,
+    created_at  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_type_night_order (type, night_order)
+);
+
+-- 夜班队列状态表（每种type各1条，共2条）
+CREATE TABLE rota_state
+(
+    id               BIGINT PRIMARY KEY AUTO_INCREMENT,
+    type             TINYINT  NOT NULL COMMENT '0=doctor 1=nurse',
+    current_staff_id BIGINT   NOT NULL COMMENT '下一个应该值夜班的人',
+    updated_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_type (type),
+    FOREIGN KEY (current_staff_id) REFERENCES staff (id)
+);
+
+-- 排班表
+CREATE TABLE schedule
+(
+    id         BIGINT PRIMARY KEY AUTO_INCREMENT,
+    staff_id   BIGINT     NOT NULL,
+    shift_date DATE       NOT NULL,
+    shift_type TINYINT    NOT NULL COMMENT '0=day 1=night 2=rest',
+    is_swapped TINYINT(1) NOT NULL DEFAULT 0 COMMENT '夜班因冲突顺延',
+    created_at DATETIME   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_staff_date (staff_id, shift_date),
+    KEY idx_date (shift_date),
+    FOREIGN KEY (staff_id) REFERENCES staff (id)
+);
