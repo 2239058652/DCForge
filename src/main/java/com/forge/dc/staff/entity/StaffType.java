@@ -1,7 +1,7 @@
 package com.forge.dc.staff.entity;
 
 public enum StaffType {
-    DOCTOR(0), NURSE(1);
+    DOCTOR(0), NURSE(1), RECEPTIONIST(2);
     public final int value;
 
     StaffType(int value) {

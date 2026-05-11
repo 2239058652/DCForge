@@ -13,14 +13,14 @@ public class StaffRequest {
 
     @NotNull
     @Min(0)
-    @Max(1)
+    @Max(2)
     private Integer type;
 
     @NotNull
     @Min(0)
     @Max(6)
     private Integer restDay;
-    
+
     /**
      * 不传则加到末尾
      */

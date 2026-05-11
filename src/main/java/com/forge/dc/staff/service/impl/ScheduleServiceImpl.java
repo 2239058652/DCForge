@@ -34,76 +34,72 @@ public class ScheduleServiceImpl implements ScheduleService {
             scheduleMapper.deleteByYearMonth(year, month);
         }
 
-        List<Staff> doctors = staffMapper.findActiveByType(StaffType.DOCTOR.value);
-        List<Staff> nurses = staffMapper.findActiveByType(StaffType.NURSE.value);
-        if (doctors.isEmpty() || nurses.isEmpty()) {
-            throw new RuntimeException("医生或护士人数为0，无法排班");
-        }
+        // 动态加载所有类型，新增类型无需再改这里
+        int[] types = {StaffType.DOCTOR.value, StaffType.NURSE.value, StaffType.RECEPTIONIST.value};
 
-        // 读取夜班指针
-        RotaState doctorState = rotaStateMapper.findByType(StaffType.DOCTOR.value);
-        RotaState nurseState = rotaStateMapper.findByType(StaffType.NURSE.value);
-        if (doctorState == null || nurseState == null) {
-            throw new RuntimeException("夜班队列状态未初始化，请先添加人员");
-        }
+        Map<Integer, List<Staff>> staffByType = new HashMap<>();
+        Map<Integer, Integer> ptrByType = new HashMap<>();
+        Map<Integer, RotaState> stateByType = new HashMap<>();
 
-        // 用 index 表示当前指针在队列中的位置
-        int doctorPtr = findIndexById(doctors, doctorState.getCurrentStaffId());
-        int nursePtr = findIndexById(nurses, nurseState.getCurrentStaffId());
+        for (int type : types) {
+            List<Staff> list = staffMapper.findActiveByType(type);
+            if (list.isEmpty()) throw new RuntimeException("类型[" + type + "]人数为0，无法排班");
+
+            RotaState state = rotaStateMapper.findByType(type);
+            if (state == null) throw new RuntimeException("类型[" + type + "]夜班队列未初始化，请先添加人员");
+
+            staffByType.put(type, list);
+            stateByType.put(type, state);
+            ptrByType.put(type, findIndexById(list, state.getCurrentStaffId()));
+        }
 
         YearMonth ym = YearMonth.of(year, month);
         List<Schedule> toInsert = new ArrayList<>();
 
         for (int day = 1; day <= ym.lengthOfMonth(); day++) {
             LocalDate date = LocalDate.of(year, month, day);
-            int weekday = date.getDayOfWeek().getValue() % 7; // 周日=0，周一=1...周六=6
+            int weekday = date.getDayOfWeek().getValue() % 7;
 
-            // 找出今天休息的人
             Set<Long> restIds = new HashSet<>();
-            collectRestIds(doctors, weekday, restIds, toInsert, date);
-            collectRestIds(nurses, weekday, restIds, toInsert, date);
 
-            // 医生夜班
-            int[] doctorResult = findNightStaff(doctors, doctorPtr, restIds);
-            int nightDoctorIdx = doctorResult[0];
-            boolean doctorSwapped = doctorResult[1] == 1;
-            Staff nightDoctor = doctors.get(nightDoctorIdx);
-            addShift(toInsert, nightDoctor.getId(), date, ShiftType.NIGHT.value, doctorSwapped);
-            // 指针移到下一个
-            doctorPtr = (nightDoctorIdx + 1) % doctors.size();
-
-            // 护士夜班
-            int[] nurseResult = findNightStaff(nurses, nursePtr, restIds);
-            int nightNurseIdx = nurseResult[0];
-            boolean nurseSwapped = nurseResult[1] == 1;
-            Staff nightNurse = nurses.get(nightNurseIdx);
-            addShift(toInsert, nightNurse.getId(), date, ShiftType.NIGHT.value, nurseSwapped);
-            nursePtr = (nightNurseIdx + 1) % nurses.size();
-
-            // 剩余 active 人员 = day
-            Set<Long> assignedToday = new HashSet<>(restIds);
-            assignedToday.add(nightDoctor.getId());
-            assignedToday.add(nightNurse.getId());
-
-            for (Staff s : doctors) {
-                if (!assignedToday.contains(s.getId())) {
-                    addShift(toInsert, s.getId(), date, ShiftType.DAY.value, false);
-                }
+            // 所有类型统一处理 rest
+            for (int type : types) {
+                collectRestIds(staffByType.get(type), weekday, restIds, toInsert, date);
             }
-            for (Staff s : nurses) {
-                if (!assignedToday.contains(s.getId())) {
-                    addShift(toInsert, s.getId(), date, ShiftType.DAY.value, false);
+
+            // 所有类型统一处理 night
+            Set<Long> nightIds = new HashSet<>();
+            for (int type : types) {
+                List<Staff> list = staffByType.get(type);
+                int ptr = ptrByType.get(type);
+                int[] result = findNightStaff(list, ptr, restIds);
+                Staff nightStaff = list.get(result[0]);
+                addShift(toInsert, nightStaff.getId(), date, ShiftType.NIGHT.value, result[1] == 1);
+                nightIds.add(nightStaff.getId());
+                ptrByType.put(type, (result[0] + 1) % list.size());
+            }
+
+            // 剩余全部 day
+            Set<Long> assignedToday = new HashSet<>(restIds);
+            assignedToday.addAll(nightIds);
+            for (int type : types) {
+                for (Staff s : staffByType.get(type)) {
+                    if (!assignedToday.contains(s.getId())) {
+                        addShift(toInsert, s.getId(), date, ShiftType.DAY.value, false);
+                    }
                 }
             }
         }
 
         scheduleMapper.batchInsert(toInsert);
 
-        // 持久化最新指针
-        doctorState.setCurrentStaffId(doctors.get(doctorPtr).getId());
-        nurseState.setCurrentStaffId(nurses.get(nursePtr).getId());
-        rotaStateMapper.upsert(doctorState);
-        rotaStateMapper.upsert(nurseState);
+        // 持久化所有类型指针
+        for (int type : types) {
+            List<Staff> list = staffByType.get(type);
+            RotaState state = stateByType.get(type);
+            state.setCurrentStaffId(list.get(ptrByType.get(type)).getId());
+            rotaStateMapper.upsert(state);
+        }
     }
 
     /**

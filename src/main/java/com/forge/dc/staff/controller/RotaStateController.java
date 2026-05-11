@@ -25,17 +25,19 @@ public class RotaStateController {
     private final RotaStateMapper rotaStateMapper;
     private final StaffMapper staffMapper;
 
-    @GetMapping
     @Operation(summary = "查看当前夜班队列状态")
+    @GetMapping
     public Result<Map<String, Object>> getState() {
         Map<String, Object> result = new LinkedHashMap<>();
-        for (int type : new int[]{0, 1}) {
+        Map<Integer, String> typeNames = Map.of(0, "doctor", 1, "nurse", 2, "receptionist");
+        for (Map.Entry<Integer, String> entry : typeNames.entrySet()) {
+            int type = entry.getKey();
             RotaState state = rotaStateMapper.findByType(type);
             List<Staff> queue = staffMapper.findActiveByType(type);
             Map<String, Object> info = new LinkedHashMap<>();
             info.put("queue", queue);
             info.put("nextStaffId", state != null ? state.getCurrentStaffId() : null);
-            result.put(type == 0 ? "doctor" : "nurse", info);
+            result.put(entry.getValue(), info);
         }
         return Result.success(result);
     }
