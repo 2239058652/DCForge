@@ -537,12 +537,15 @@ const Schedule = () => {
                                             <div className="shift-row">{renderShiftGroup(dayItem, 0, 1)}</div>
                                             <div className="shift-row">{renderShiftGroup(dayItem, 0, 2)}</div>
                                         </div>
-                                        <div className="shift-section rest">
-                                            <div className="shift-label">休息</div>
-                                            <div className="shift-row">{renderShiftGroup(dayItem, 2, 0)}</div>
-                                            <div className="shift-row">{renderShiftGroup(dayItem, 2, 1)}</div>
-                                            <div className="shift-row">{renderShiftGroup(dayItem, 2, 2)}</div>
-                                        </div>
+                                        {/* 仅当该日存在至少一条休息班次时才显示休息模块 */}
+                                        {dayItem && dayItem.shifts.some((s) => s.shiftType === 2) && (
+                                            <div className="shift-section rest">
+                                                <div className="shift-label">休息</div>
+                                                <div className="shift-row">{renderShiftGroup(dayItem, 2, 0)}</div>
+                                                <div className="shift-row">{renderShiftGroup(dayItem, 2, 1)}</div>
+                                                <div className="shift-row">{renderShiftGroup(dayItem, 2, 2)}</div>
+                                            </div>
+                                        )}
                                     </div>
                                 )
                             })}
