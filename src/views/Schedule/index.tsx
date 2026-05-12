@@ -28,6 +28,7 @@ import {
     type StaffPayload,
     type StaffType
 } from '@/api/schedule'
+import html2canvas from 'html2canvas'
 import './index.css'
 
 const staffTypeOptions = [
@@ -277,6 +278,29 @@ const Schedule = () => {
         }
     }
 
+    const handleExportImage = async () => {
+        const board = document.querySelector('.schedule-board') as HTMLElement | null
+        if (!board) {
+            message.warning('未找到排班看板')
+            return
+        }
+
+        try {
+            const canvas = await html2canvas(board, {
+                backgroundColor: '#ffffff',
+                scale: 2, // 高清输出
+                useCORS: true
+            })
+            const link = document.createElement('a')
+            link.download = `排班_${monthValue.format('YYYY-MM')}.png`
+            link.href = canvas.toDataURL('image/png')
+            link.click()
+            message.success('导出成功')
+        } catch {
+            message.error('导出失败')
+        }
+    }
+
     const openStaffSchedule = async (staff: StaffItem) => {
         setStaffScheduleModal(staff)
         setLoadingSchedule(true)
@@ -482,6 +506,9 @@ const Schedule = () => {
                                     删除本月
                                 </Button>
                             </Popconfirm>
+                            <Button icon={<Icon icon="solar:download-bold" />} onClick={handleExportImage}>
+                                导出图片
+                            </Button>
                         </Space>
                         <Button icon={<Icon icon="solar:user-plus-rounded-bold" />} onClick={openCreateModal}>
                             新增人员
