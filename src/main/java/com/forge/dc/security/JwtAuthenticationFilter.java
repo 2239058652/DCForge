@@ -1,12 +1,13 @@
 package com.forge.dc.security;
 
 import com.forge.dc.common.util.JwtUtils;
-import com.forge.dc.users.mapper.UserMapper;
+import com.forge.dc.common.util.UserAuthCacheManagerUtils;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,15 +17,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
-    private final UserMapper userMapper;
+    private final UserAuthCacheManagerUtils cacheManager;
 
-    public JwtAuthenticationFilter(JwtUtils jwtUtils, UserMapper userMapper) {
+    public JwtAuthenticationFilter(JwtUtils jwtUtils, UserAuthCacheManagerUtils cacheManager) {
         this.jwtUtils = jwtUtils;
-        this.userMapper = userMapper;
+        this.cacheManager = cacheManager;
     }
 
     @Override
@@ -47,8 +49,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Claims claims = jwtUtils.parseToken(token);
         Long userId = Long.valueOf(claims.getSubject());
         String username = claims.get("username", String.class);
-        List<String> roles = userMapper.findRoleCodesByUserId(userId);
-        List<String> permissions = userMapper.findPermissionCodesByUserId(userId);
+
+        // 从 Redis 读取
+        List<String> roles = cacheManager.getRoles(userId);
+        List<String> permissions = cacheManager.getPermissions(userId);
 
         LoginUser loginUser = new LoginUser(userId, username, roles, permissions);
         UsernamePasswordAuthenticationToken authentication =
@@ -61,4 +65,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         filterChain.doFilter(request, response);
     }
+
 }

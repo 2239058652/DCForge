@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: DCForge
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
 
   datasource:
     url: jdbc:mysql://localhost:3306/dc_forge?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
@@ -21,6 +24,7 @@ mybatis:
   mapper-locations: classpath*:mapper/**/*.xml
   configuration:
     map-underscore-to-camel-case: true # 开启驼峰映射
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 springdoc:
   swagger-ui:
@@ -31,3 +35,6 @@ jwt:
   secret: "E7zckGatiqyT2BSbjNJsLA3xOVdgv8pK91w4hXPWIZfRenmlFD6MHY0ourQCU5"
   expire: 86400000
 
+#logging:
+#  level:
+#    com.forge.dc.users.mapper: DEBUG

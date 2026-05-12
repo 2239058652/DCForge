@@ -3,6 +3,7 @@ package com.forge.dc.users.service.impl;
 import com.forge.dc.common.exception.BusinessException;
 import com.forge.dc.common.result.ResultCode;
 import com.forge.dc.common.util.JwtUtils;
+import com.forge.dc.common.util.UserAuthCacheManagerUtils;
 import com.forge.dc.users.dto.UserLoginDto;
 import com.forge.dc.users.dto.UserRegisterDto;
 import com.forge.dc.users.entity.SysUserEntity;
@@ -26,11 +27,14 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final UserAuthCacheManagerUtils cacheManager;
 
-    public UserServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
+    public UserServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder,
+                           JwtUtils jwtUtils, UserAuthCacheManagerUtils cacheManager) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
+        this.cacheManager = cacheManager;
     }
 
     @Override
@@ -83,6 +87,10 @@ public class UserServiceImpl implements UserService {
 
         List<String> roles = userMapper.findRoleCodesByUserId(user.getId());
         List<String> permissions = userMapper.findPermissionCodesByUserId(user.getId());
+
+        // 写入 Redis 缓存
+        cacheManager.save(user.getId(), roles, permissions);
+
         String token = jwtUtils.generateToken(user.getId(), user.getUsername());
 
         UserLoginVO vo = new UserLoginVO();

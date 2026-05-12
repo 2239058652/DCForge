@@ -1,30 +1,20 @@
 package com.forge.dc.users.controller;
 
 import com.forge.dc.common.result.Result;
-import com.forge.dc.users.dto.PermissionSaveDto;
-import com.forge.dc.users.dto.PermissionUpdateDto;
-import com.forge.dc.users.dto.RolePermissionAssignDto;
-import com.forge.dc.users.dto.RoleSaveDto;
-import com.forge.dc.users.dto.RoleUpdateDto;
-import com.forge.dc.users.dto.UserRoleAssignDto;
+import com.forge.dc.users.dto.*;
 import com.forge.dc.users.entity.SysPermissionEntity;
 import com.forge.dc.users.entity.SysRoleEntity;
 import com.forge.dc.users.service.RbacService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/rbac")
+@Tag(name = "权限管理", description = "RBAC管理的相关接口")
 public class RbacController {
 
     private final RbacService rbacService;
