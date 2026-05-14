@@ -1,10 +1,36 @@
+
 ### 注册用户
 POST http://localhost:5273/users/register
 Content-Type: application/json
 
 {
-  "username": "user1",
-  "password": "User@123"
+  "username": "user4",
+  "password": "User@123",
+  "nickname": "李四😊",
+  "avatar": "https://cdn.jsdelivr.net/gh/itclanCoder/blog_img/img/20200922151930.png"
+}
+
+### 查询用户列表
+GET http://localhost:5273/users/list
+
+### 查询用户分页列表
+GET http://localhost:5273/users/page?pageNum=1&pageSize=10&username=+
+
+### 删除用户通过id
+DELETE http://localhost:5273/users/delete/3
+
+### 查询用户通过id
+GET http://localhost:5273/users/find/3
+
+### 修改用户通过id
+PUT http://localhost:5273/users/update/3
+Content-Type: application/json
+
+{
+  "username": "user4",
+  "password": "User@123",
+  "nickname": "李四😊",
+  "avatar": "https://cdn.jsdelivr.net/gh/itclanCoder/blog_img/img/20200922151930.png"
 }
 
 ### 用户登录
@@ -12,9 +38,14 @@ POST http://localhost:5273/users/login
 Content-Type: application/json
 
 {
-  "username": "user4",
-  "password": "User@123"
+  "username": "admin",
+  "password": "Admin@123"
 }
 
-### 查询用户列表
-GET http://localhost:5273/users/list
+### 用户注销
+POST http://localhost:5273/users/logout
+Content-Type: application/json
+
+{
+  "token": ""
+}

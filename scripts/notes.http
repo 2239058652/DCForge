@@ -1,5 +1,7 @@
 ### 获取note列表
 GET http://localhost:5273/notes/list
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc3ODU3NzcxNSwiZXhwIjoxNzc4NjY0MTE1fQ.ABkPahd4wh6QLKTR9KC86BUXSe_Ovr2qoIdw-CmKx4PAYGfZ63iMj-FIq1V7ukr1
+
 
 ### 获取note分页列表
 GET http://localhost:5273/notes/page?pageNum=1&pageSize=10&content=+
@@ -14,6 +16,8 @@ Content-Type: application/json
 
 ### 删除notet通过id
 DELETE http://localhost:5273/notes/delete/3
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc3ODU3NzcxNSwiZXhwIjoxNzc4NjY0MTE1fQ.ABkPahd4wh6QLKTR9KC86BUXSe_Ovr2qoIdw-CmKx4PAYGfZ63iMj-FIq1V7ukr1
+
 
 ### 查询note通过id
 GET http://localhost:5273/notes/find/3

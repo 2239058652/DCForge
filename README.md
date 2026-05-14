@@ -19,6 +19,9 @@ react 19 + vite + antd + tailwind-css + router v7 的系统模板，需配置菜
 3.  pnpm prew # 预览打包后的文件
 4.  pnpm knip # 检查依赖、文件使用情况
 5.  pnpm check-deps # 检测依赖可升级情况
+
+#### 启动redis
+cd 'C:\Program Files\Redis-3.0.504'; .\redis-server.exe
  
 
 # 🛠️ 前端调试黑科技清单
