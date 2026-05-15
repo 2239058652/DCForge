@@ -41,4 +41,6 @@ public interface RbacMapper {
     int deleteRolePermissions(Long roleId);
 
     int addRolePermissions(@Param("roleId") Long roleId, @Param("permissionIds") List<Long> permissionIds);
+
+    List<Long> findUserIdsByRoleId(@Param("roleId") Long roleId);
 }

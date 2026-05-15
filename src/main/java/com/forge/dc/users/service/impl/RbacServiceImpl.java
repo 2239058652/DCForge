@@ -3,6 +3,7 @@ package com.forge.dc.users.service.impl;
 import com.forge.dc.common.exception.BusinessException;
 import com.forge.dc.common.result.PageResult;
 import com.forge.dc.common.result.ResultCode;
+import com.forge.dc.common.util.UserAuthCacheManagerUtils;
 import com.forge.dc.users.dto.*;
 import com.forge.dc.users.entity.SysPermissionEntity;
 import com.forge.dc.users.entity.SysRoleEntity;
@@ -18,9 +19,11 @@ import java.util.List;
 public class RbacServiceImpl implements RbacService {
 
     private final RbacMapper rbacMapper;
+    private final UserAuthCacheManagerUtils cacheManager;
 
-    public RbacServiceImpl(RbacMapper rbacMapper) {
+    public RbacServiceImpl(RbacMapper rbacMapper, UserAuthCacheManagerUtils cacheManager) {
         this.rbacMapper = rbacMapper;
+        this.cacheManager = cacheManager;
     }
 
     @Override
@@ -109,12 +112,16 @@ public class RbacServiceImpl implements RbacService {
     public void assignUserRoles(UserRoleAssignDto dto) {
         rbacMapper.deleteUserRoles(dto.getUserId());
         checkRows(rbacMapper.addUserRoles(dto.getUserId(), dto.getRoleIds()), "assign user roles failed");
+        cacheManager.evict(dto.getUserId());
     }
 
     @Override
     public void assignRolePermissions(RolePermissionAssignDto dto) {
         rbacMapper.deleteRolePermissions(dto.getRoleId());
         checkRows(rbacMapper.addRolePermissions(dto.getRoleId(), dto.getPermissionIds()), "assign role permissions failed");
+
+        List<Long> userIds = rbacMapper.findUserIdsByRoleId(dto.getRoleId());
+        userIds.forEach(cacheManager::evict);
     }
 
     private void checkRows(int rows, String message) {

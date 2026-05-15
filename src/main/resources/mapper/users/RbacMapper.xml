@@ -74,6 +74,10 @@
         ORDER BY id
     </select>
 
+    <select id="findUserIdsByRoleId" resultType="java.lang.Long">
+        SELECT user_id FROM sys_user_role WHERE role_id = #{roleId}
+    </select>
+
     <insert id="addPermission" parameterType="com.forge.dc.users.entity.SysPermissionEntity"
             useGeneratedKeys="true" keyProperty="id">
         insert into sys_permission (permission_code, permission_name, resource_type, path, status)
