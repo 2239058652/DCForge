@@ -1,11 +1,7 @@
 package com.forge.dc.users.service;
 
-import com.forge.dc.users.dto.PermissionSaveDto;
-import com.forge.dc.users.dto.PermissionUpdateDto;
-import com.forge.dc.users.dto.RolePermissionAssignDto;
-import com.forge.dc.users.dto.RoleSaveDto;
-import com.forge.dc.users.dto.RoleUpdateDto;
-import com.forge.dc.users.dto.UserRoleAssignDto;
+import com.forge.dc.common.result.PageResult;
+import com.forge.dc.users.dto.*;
 import com.forge.dc.users.entity.SysPermissionEntity;
 import com.forge.dc.users.entity.SysRoleEntity;
 
@@ -22,6 +18,8 @@ public interface RbacService {
     void deleteRole(Long id);
 
     List<SysPermissionEntity> findPermissions();
+
+    PageResult<SysPermissionEntity> findPermissionsByPage(PermissionPageDto dto);
 
     void addPermission(PermissionSaveDto dto);
 

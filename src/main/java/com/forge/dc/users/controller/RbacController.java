@@ -1,5 +1,6 @@
 package com.forge.dc.users.controller;
 
+import com.forge.dc.common.result.PageResult;
 import com.forge.dc.common.result.Result;
 import com.forge.dc.users.dto.*;
 import com.forge.dc.users.entity.SysPermissionEntity;
@@ -60,6 +61,13 @@ public class RbacController {
     @Operation(summary = "查询权限列表")
     public Result<List<SysPermissionEntity>> findPermissions() {
         return Result.success(rbacService.findPermissions());
+    }
+
+    @GetMapping("/permissions/page")
+    @PreAuthorize("hasAuthority('permission:list')")
+    @Operation(summary = "分页查询权限列表")
+    public Result<PageResult<SysPermissionEntity>> findPermissionsByPage(@Valid PermissionPageDto dto) {
+        return Result.success(rbacService.findPermissionsByPage(dto));
     }
 
     @PostMapping("/permissions")

@@ -1,17 +1,15 @@
 package com.forge.dc.users.service.impl;
 
 import com.forge.dc.common.exception.BusinessException;
+import com.forge.dc.common.result.PageResult;
 import com.forge.dc.common.result.ResultCode;
-import com.forge.dc.users.dto.PermissionSaveDto;
-import com.forge.dc.users.dto.PermissionUpdateDto;
-import com.forge.dc.users.dto.RolePermissionAssignDto;
-import com.forge.dc.users.dto.RoleSaveDto;
-import com.forge.dc.users.dto.RoleUpdateDto;
-import com.forge.dc.users.dto.UserRoleAssignDto;
+import com.forge.dc.users.dto.*;
 import com.forge.dc.users.entity.SysPermissionEntity;
 import com.forge.dc.users.entity.SysRoleEntity;
 import com.forge.dc.users.mapper.RbacMapper;
 import com.forge.dc.users.service.RbacService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -57,6 +55,26 @@ public class RbacServiceImpl implements RbacService {
     @Override
     public List<SysPermissionEntity> findPermissions() {
         return rbacMapper.findPermissions();
+    }
+
+    @Override
+    public PageResult<SysPermissionEntity> findPermissionsByPage(PermissionPageDto dto) {
+        PageHelper.startPage(dto.getPageNum(), dto.getPageSize());
+        List<SysPermissionEntity> list = rbacMapper.findPermissionsByCondition(
+                dto.getPermissionCode(),
+                dto.getPermissionName(),
+                dto.getResourceType(),
+                dto.getStatus(),
+                dto.getPath()
+        );
+
+        PageInfo<SysPermissionEntity> pageInfo = new PageInfo<>(list);
+        return new PageResult<>(
+                pageInfo.getTotal(),
+                pageInfo.getList(),
+                pageInfo.getPageNum(),
+                pageInfo.getPageSize()
+        );
     }
 
     @Override

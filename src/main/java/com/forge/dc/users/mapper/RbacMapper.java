@@ -20,6 +20,14 @@ public interface RbacMapper {
 
     List<SysPermissionEntity> findPermissions();
 
+    List<SysPermissionEntity> findPermissionsByCondition(
+            @Param("permissionCode") String permissionCode,
+            @Param("permissionName") String permissionName,
+            @Param("resourceType") String resourceType,
+            @Param("status") Integer status,
+            @Param("path") String path
+    );
+
     int addPermission(SysPermissionEntity permission);
 
     int updatePermission(SysPermissionEntity permission);

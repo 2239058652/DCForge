@@ -4,11 +4,11 @@
 
     <select id="findRoles" resultType="com.forge.dc.users.entity.SysRoleEntity">
         select id,
-               role_code,
-               role_name,
-               status,
-               created_at,
-               updated_at
+        role_code,
+        role_name,
+        status,
+        created_at,
+        updated_at
         from sys_role
         order by id
     </select>
@@ -22,8 +22,8 @@
     <update id="updateRole" parameterType="com.forge.dc.users.entity.SysRoleEntity">
         update sys_role
         set role_code = #{roleCode},
-            role_name = #{roleName},
-            status = #{status}
+        role_name = #{roleName},
+        status = #{status}
         where id = #{id}
     </update>
 
@@ -33,15 +33,45 @@
 
     <select id="findPermissions" resultType="com.forge.dc.users.entity.SysPermissionEntity">
         select id,
-               permission_code,
-               permission_name,
-               resource_type,
-               path,
-               status,
-               created_at,
-               updated_at
+        permission_code,
+        permission_name,
+        resource_type,
+        path,
+        status,
+        created_at,
+        updated_at
         from sys_permission
         order by id
+    </select>
+
+    <select id="findPermissionsByCondition" resultType="com.forge.dc.users.entity.SysPermissionEntity">
+        SELECT id,
+        permission_code,
+        permission_name,
+        resource_type,
+        path,
+        status,
+        created_at,
+        updated_at
+        FROM sys_permission
+        <where>
+            <if test="permissionCode != null and permissionCode != ''">
+                AND permission_code LIKE CONCAT('%', #{permissionCode}, '%')
+            </if>
+            <if test="permissionName != null and permissionName != ''">
+                AND permission_name LIKE CONCAT('%', #{permissionName}, '%')
+            </if>
+            <if test="resourceType != null and resourceType != ''">
+                AND resource_type = #{resourceType}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="path != null and path != ''">
+                AND path LIKE CONCAT('%', #{path}, '%')
+            </if>
+        </where>
+        ORDER BY id
     </select>
 
     <insert id="addPermission" parameterType="com.forge.dc.users.entity.SysPermissionEntity"
@@ -53,10 +83,10 @@
     <update id="updatePermission" parameterType="com.forge.dc.users.entity.SysPermissionEntity">
         update sys_permission
         set permission_code = #{permissionCode},
-            permission_name = #{permissionName},
-            resource_type = #{resourceType},
-            path = #{path},
-            status = #{status}
+        permission_name = #{permissionName},
+        resource_type = #{resourceType},
+        path = #{path},
+        status = #{status}
         where id = #{id}
     </update>
 
