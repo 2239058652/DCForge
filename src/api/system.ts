@@ -1,11 +1,25 @@
 import request from '@/request'
+import type { ApiResult } from '@/api/user'
 
-// 获取系统配置
-export function systemConfigApi() {
-    return request({
-        url: '/system/config',
-        method: 'get'
-    })
+export interface InterfacePermissionItem {
+    id: number
+    httpMethod: string
+    urlPattern: string
+    permissionCode: string
+    description?: string
+    createdAt?: string
 }
 
- 
+export interface InterfacePermissionPayload {
+    httpMethod: string
+    urlPattern: string
+    permissionCode: string
+    description?: string
+}
+
+export const interfacePermissionApi = {
+    list: () => request.get<ApiResult<InterfacePermissionItem[]>>('/admin/interface-permissions'),
+    add: (data: InterfacePermissionPayload) => request.post<ApiResult<unknown>>('/admin/interface-permissions', data),
+    remove: (id: number) => request.delete<ApiResult<unknown>>(`/admin/interface-permissions/${id}`),
+    refresh: () => request.post<ApiResult<unknown>>('/admin/interface-permissions/refresh')
+}

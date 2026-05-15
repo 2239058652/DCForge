@@ -5,6 +5,7 @@ import NotFound from '@/views/NotFound'
 import Notes from '@/views/Notes'
 import Rbac from '@/views/Rbac'
 import Schedule from '@/views/Schedule'
+import System from '@/views/System'
 import Users from '@/views/Users'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 
@@ -47,6 +48,14 @@ export const routeConfig = processRoutes([
                 element: <Rbac />,
                 meta: {
                     title: '权限管理',
+                    requiredAuth: true
+                }
+            },
+            {
+                path: 'system',
+                element: <System />,
+                meta: {
+                    title: '系统管理',
                     requiredAuth: true
                 }
             }
