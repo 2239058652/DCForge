@@ -50,4 +50,6 @@ public interface StaffMapper {
     @Update("UPDATE staff SET night_order = night_order + 1, updated_at=NOW() " +
             "WHERE type=#{type} AND night_order >= #{order}")
     void shiftOrderUp(@Param("type") int type, @Param("order") int order);
+
+    List<Staff> findByCondition(@Param("name") String name, @Param("type") Integer type);
 }

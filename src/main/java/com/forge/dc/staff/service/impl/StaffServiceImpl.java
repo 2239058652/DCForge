@@ -1,11 +1,15 @@
 package com.forge.dc.staff.service.impl;
 
+import com.forge.dc.common.result.PageResult;
+import com.forge.dc.staff.dto.StaffPageDto;
 import com.forge.dc.staff.dto.StaffRequest;
 import com.forge.dc.staff.entity.RotaState;
 import com.forge.dc.staff.entity.Staff;
 import com.forge.dc.staff.mapper.RotaStateMapper;
 import com.forge.dc.staff.mapper.StaffMapper;
 import com.forge.dc.staff.service.StaffService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -113,5 +117,21 @@ public class StaffServiceImpl implements StaffService {
         staff.setNightOrder((maxOrder == null ? 0 : maxOrder) + 1);
         staffMapper.updateActive(id, true);
         staffMapper.update(staff);
+    }
+
+    @Override
+    public PageResult<Staff> findStaffByPage(StaffPageDto dto) {
+        // 启动分页，必须紧挨着查询方法
+        PageHelper.startPage(dto.getPageNum(), dto.getPageSize());
+
+        List<Staff> list = staffMapper.findByCondition(dto.getName(), dto.getType());
+        PageInfo<Staff> pageInfo = new PageInfo<>(list);
+
+        return new PageResult<>(
+                pageInfo.getTotal(),
+                pageInfo.getList(),
+                pageInfo.getPageNum(),
+                pageInfo.getPageSize()
+        );
     }
 }

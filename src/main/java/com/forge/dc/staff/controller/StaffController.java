@@ -1,6 +1,8 @@
 package com.forge.dc.staff.controller;
 
+import com.forge.dc.common.result.PageResult;
 import com.forge.dc.common.result.Result;
+import com.forge.dc.staff.dto.StaffPageDto;
 import com.forge.dc.staff.dto.StaffRequest;
 import com.forge.dc.staff.entity.Staff;
 import com.forge.dc.staff.service.StaffService;
@@ -24,6 +26,12 @@ public class StaffController {
     @Operation(summary = "获取所有人员")
     public Result<List<Staff>> list() {
         return Result.success(staffService.listAll());
+    }
+
+    @GetMapping("/page")
+    @Operation(summary = "分页查询所有人员")
+    public Result<PageResult<Staff>> page(@Valid StaffPageDto dto) {
+        return Result.success(staffService.findStaffByPage(dto));
     }
 
     @PostMapping
