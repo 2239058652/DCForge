@@ -1,8 +1,8 @@
 package com.forge.dc.security;
 
-import com.forge.dc.Interface.entity.InterfacePermission;
-import com.forge.dc.Interface.service.InterfacePermissionService;
 import com.forge.dc.common.util.InterfacePermissionCacheUtils;
+import com.forge.dc.modules.Interface.entity.InterfacePermission;
+import com.forge.dc.modules.Interface.service.InterfacePermissionService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

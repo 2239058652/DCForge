@@ -1,0 +1,24 @@
+package com.forge.dc.modules.note.service;
+
+import com.forge.dc.common.result.PageResult;
+import com.forge.dc.modules.note.dto.NoteAddDto;
+import com.forge.dc.modules.note.dto.NotePageDto;
+import com.forge.dc.modules.note.dto.NoteUpdateDto;
+import com.forge.dc.modules.note.vo.NoteListVo;
+
+import java.util.List;
+
+public interface NoteService {
+
+    List<NoteListVo> findNotesAll();
+
+    void addNote(NoteAddDto noteAddDto);
+
+    void deleteNote(Long id);
+
+    void editNote(Long id, NoteUpdateDto noteUpdateDto);
+
+    NoteListVo findNoteById(Long id);
+
+    PageResult<NoteListVo> findNotesByPage(NotePageDto notePageDto);
+}

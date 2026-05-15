@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.forge.dc.note.mapper.NoteMapper">
+<mapper namespace="com.forge.dc.modules.note.mapper.NoteMapper">
 
-    <insert id="addNote" parameterType="com.forge.dc.note.entity.NoteEntity">
+    <insert id="addNote" parameterType="com.forge.dc.modules.note.entity.NoteEntity">
         insert into note (
         user_id,
         content,
@@ -27,7 +27,7 @@
         and user_id = #{userId}
     </update>
 
-    <select id="getNoteList" resultType="com.forge.dc.note.entity.NoteEntity">
+    <select id="getNoteList" resultType="com.forge.dc.modules.note.entity.NoteEntity">
         select
         id,
         user_id,
@@ -39,7 +39,7 @@
         order by id desc
     </select>
 
-    <select id="getNoteById" resultType="com.forge.dc.note.entity.NoteEntity">
+    <select id="getNoteById" resultType="com.forge.dc.modules.note.entity.NoteEntity">
         select
         id,
         user_id,
@@ -61,7 +61,7 @@
         </where>
     </select>
 
-    <select id="getNoteListByPage" resultType="com.forge.dc.note.entity.NoteEntity">
+    <select id="getNoteListByPage" resultType="com.forge.dc.modules.note.entity.NoteEntity">
         select
         id,
         user_id,

@@ -1,8 +1,8 @@
 package com.forge.dc.note.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.forge.dc.note.dto.NoteAddDto;
-import com.forge.dc.note.dto.NoteUpdateDto;
+import com.forge.dc.modules.note.dto.NoteAddDto;
+import com.forge.dc.modules.note.dto.NoteUpdateDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.forge.dc.users.mapper.RbacMapper">
+<mapper namespace="com.forge.dc.modules.users.mapper.RbacMapper">
 
-    <select id="findRoles" resultType="com.forge.dc.users.entity.SysRoleEntity">
+    <select id="findRoles" resultType="com.forge.dc.modules.users.entity.SysRoleEntity">
         select id,
         role_code,
         role_name,
@@ -13,13 +13,13 @@
         order by id
     </select>
 
-    <insert id="addRole" parameterType="com.forge.dc.users.entity.SysRoleEntity"
+    <insert id="addRole" parameterType="com.forge.dc.modules.users.entity.SysRoleEntity"
             useGeneratedKeys="true" keyProperty="id">
         insert into sys_role (role_code, role_name, status)
         values (#{roleCode}, #{roleName}, #{status})
     </insert>
 
-    <update id="updateRole" parameterType="com.forge.dc.users.entity.SysRoleEntity">
+    <update id="updateRole" parameterType="com.forge.dc.modules.users.entity.SysRoleEntity">
         update sys_role
         set role_code = #{roleCode},
         role_name = #{roleName},
@@ -31,7 +31,7 @@
         delete from sys_role where id = #{id}
     </delete>
 
-    <select id="findPermissions" resultType="com.forge.dc.users.entity.SysPermissionEntity">
+    <select id="findPermissions" resultType="com.forge.dc.modules.users.entity.SysPermissionEntity">
         select id,
         permission_code,
         permission_name,
@@ -44,7 +44,7 @@
         order by id
     </select>
 
-    <select id="findPermissionsByCondition" resultType="com.forge.dc.users.entity.SysPermissionEntity">
+    <select id="findPermissionsByCondition" resultType="com.forge.dc.modules.users.entity.SysPermissionEntity">
         SELECT id,
         permission_code,
         permission_name,
@@ -78,13 +78,13 @@
         SELECT user_id FROM sys_user_role WHERE role_id = #{roleId}
     </select>
 
-    <insert id="addPermission" parameterType="com.forge.dc.users.entity.SysPermissionEntity"
+    <insert id="addPermission" parameterType="com.forge.dc.modules.users.entity.SysPermissionEntity"
             useGeneratedKeys="true" keyProperty="id">
         insert into sys_permission (permission_code, permission_name, resource_type, path, status)
         values (#{permissionCode}, #{permissionName}, #{resourceType}, #{path}, #{status})
     </insert>
 
-    <update id="updatePermission" parameterType="com.forge.dc.users.entity.SysPermissionEntity">
+    <update id="updatePermission" parameterType="com.forge.dc.modules.users.entity.SysPermissionEntity">
         update sys_permission
         set permission_code = #{permissionCode},
         permission_name = #{permissionName},

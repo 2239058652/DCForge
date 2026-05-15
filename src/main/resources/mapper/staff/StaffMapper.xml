@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.forge.dc.staff.mapper.StaffMapper">
+<mapper namespace="com.forge.dc.modules.staff.mapper.StaffMapper">
 
 
-    <select id="findByCondition" resultType="com.forge.dc.staff.entity.Staff">
+    <select id="findByCondition" resultType="com.forge.dc.modules.staff.entity.Staff">
         select * from staff
         <where>
             <if test="name != null and name != ''">
