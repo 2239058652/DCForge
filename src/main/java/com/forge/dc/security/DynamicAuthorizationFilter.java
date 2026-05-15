@@ -29,7 +29,8 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
             "/users/register",
             "/swagger-ui.html",
             "/swagger-ui/**",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/admin/**"   // 管理接口走 @PreAuthorize，不走动态规则
     );
 
     private final InterfacePermissionRuleLoader ruleLoader;
@@ -63,6 +64,12 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
         }
 
         String requiredPermission = matchPermission(method, uri);
+
+        // 配置了 PERMIT_ALL 的接口直接放行
+        if ("PERMIT_ALL".equals(requiredPermission)) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         if (requiredPermission != null) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();

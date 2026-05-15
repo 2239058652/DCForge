@@ -197,3 +197,28 @@ CREATE TABLE interface_permission
     created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uk_method_pattern (http_method, url_pattern)
 ) COMMENT '接口权限映射表';
+
+-- 给admin账号插入权限 注意 id
+INSERT IGNORE INTO sys_role_permission (role_id, permission_id)
+SELECT 1, id
+FROM sys_permission;
+
+-- 把排版模块的所有接口都加进无需权限
+-- 人员管理 (StaffController)
+INSERT INTO interface_permission (http_method, url_pattern, permission_code, description)
+VALUES ('GET', '/api/staff', 'PERMIT_ALL', '获取所有人员'),
+       ('POST', '/api/staff', 'PERMIT_ALL', '新增人员'),
+       ('PUT', '/api/staff/{id}', 'PERMIT_ALL', '修改人员信息'),
+       ('PUT', '/api/staff/{id}/deactivate', 'PERMIT_ALL', '停用人员'),
+       ('PUT', '/api/staff/{id}/activate', 'PERMIT_ALL', '启用人员');
+
+-- 排班管理 (ScheduleController)
+INSERT INTO interface_permission (http_method, url_pattern, permission_code, description)
+VALUES ('POST', '/api/schedule/generate', 'PERMIT_ALL', '生成排班'),
+       ('GET', '/api/schedule', 'PERMIT_ALL', '获取月视图排班'),
+       ('GET', '/api/schedule/staff/{id}', 'PERMIT_ALL', '获取某人排班'),
+       ('DELETE', '/api/schedule', 'PERMIT_ALL', '删除某月排班');
+
+-- 夜班队列状态 (RotaStateController)
+INSERT INTO interface_permission (http_method, url_pattern, permission_code, description)
+VALUES ('GET', '/api/rota-state', 'PERMIT_ALL', '查看夜班队列状态');
