@@ -14,13 +14,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final DynamicAuthorizationFilter dynamicAuthorizationFilter;
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                          DynamicAuthorizationFilter dynamicAuthorizationFilter,
                           CustomAccessDeniedHandler accessDeniedHandler,
                           CustomAuthenticationEntryPoint authenticationEntryPoint) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.dynamicAuthorizationFilter = dynamicAuthorizationFilter;
         this.accessDeniedHandler = accessDeniedHandler;
         this.authenticationEntryPoint = authenticationEntryPoint;
     }
@@ -43,6 +46,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(dynamicAuthorizationFilter, JwtAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint) // 处理未认证
                         .accessDeniedHandler(accessDeniedHandler)           // 处理权限不足

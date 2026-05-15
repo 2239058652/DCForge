@@ -185,3 +185,15 @@ CREATE TABLE schedule
     KEY idx_date (shift_date),
     FOREIGN KEY (staff_id) REFERENCES staff (id)
 );
+
+-- 接口权限映射表
+CREATE TABLE interface_permission
+(
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    http_method     VARCHAR(10)  NOT NULL COMMENT 'GET/POST/PUT/DELETE',
+    url_pattern     VARCHAR(200) NOT NULL COMMENT '接口路径，支持 /roles/{id} 格式',
+    permission_code VARCHAR(100) NOT NULL COMMENT '对应权限码，如 role:update',
+    description     VARCHAR(200) COMMENT '描述',
+    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_method_pattern (http_method, url_pattern)
+) COMMENT '接口权限映射表';
