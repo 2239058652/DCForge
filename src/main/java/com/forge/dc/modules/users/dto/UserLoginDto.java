@@ -14,4 +14,12 @@ public class UserLoginDto {
     @NotBlank(message = "密码不能为空")
     @Schema(defaultValue = "Admin@123", description = "登录密码")
     private String password;
+
+    @NotBlank(message = "验证码不能为空")
+    @Schema(description = "验证码")
+    private String captchaCode;
+
+    @NotBlank(message = "验证码UUID不能为空")
+    @Schema(description = "验证码UUID")
+    private String captchaUuid;
 }

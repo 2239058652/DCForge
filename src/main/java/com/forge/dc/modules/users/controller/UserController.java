@@ -8,6 +8,7 @@ import com.forge.dc.modules.users.vo.SysUserListVO;
 import com.forge.dc.modules.users.vo.UserLoginVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -55,6 +56,25 @@ public class UserController {
     @PostMapping("/login")
     public Result<UserLoginVO> login(@RequestBody @Valid UserLoginDto userLoginDto) {
         return Result.success("登录成功", userService.login(userLoginDto));
+    }
+
+    /**
+     * 登出
+     *
+     */
+    @Operation(summary = "登出")
+    @PostMapping("/logout")
+    public Result<Void> logout(HttpServletRequest request) {
+        userService.logout(extractToken(request));
+        return Result.success("已登出");
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            return authorization.substring(7);
+        }
+        return null;
     }
 
 }

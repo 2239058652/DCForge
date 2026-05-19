@@ -8,6 +8,7 @@ import com.forge.dc.modules.users.dto.UserLoginDto;
 import com.forge.dc.modules.users.dto.UserRegisterDto;
 import com.forge.dc.modules.users.entity.SysUserEntity;
 import com.forge.dc.modules.users.mapper.UserMapper;
+import com.forge.dc.modules.users.service.CaptchaService;
 import com.forge.dc.modules.users.service.UserService;
 import com.forge.dc.modules.users.vo.SysUserListVO;
 import com.forge.dc.modules.users.vo.UserLoginVO;
@@ -28,13 +29,16 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final UserAuthCacheManagerUtils cacheManager;
+    private final CaptchaService captchaService;
 
     public UserServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder,
-                           JwtUtils jwtUtils, UserAuthCacheManagerUtils cacheManager) {
+                           JwtUtils jwtUtils, UserAuthCacheManagerUtils cacheManager,
+                           CaptchaService captchaService) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
         this.cacheManager = cacheManager;
+        this.captchaService = captchaService;
     }
 
     @Override
@@ -71,6 +75,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserLoginVO login(UserLoginDto userLoginDto) {
+
+        // 验证码校验（最先执行）
+        captchaService.validate(userLoginDto.getCaptchaUuid(), userLoginDto.getCaptchaCode());
+
         SysUserEntity user = userMapper.findByUsername(userLoginDto.getUsername());
 
         if (user == null) {
@@ -103,6 +111,17 @@ public class UserServiceImpl implements UserService {
         vo.setToken(token);
 
         return vo;
+    }
+
+    @Override
+    public void logout(String token) {
+        if (token == null) {
+            throw new BusinessException(ResultCode.UNAUTHORIZED.getCode(), "未携带 token");
+        }
+        long remaining = jwtUtils.getRemainingExpire(token);
+        if (remaining > 0) {
+            cacheManager.addToBlacklist(token, remaining);
+        }
     }
 
     private SysUserListVO toUserListVo(SysUserEntity entity) {

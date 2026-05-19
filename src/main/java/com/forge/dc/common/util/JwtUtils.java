@@ -44,6 +44,15 @@ public class JwtUtils {
                 .getPayload();
     }
 
+    public long getRemainingExpire(String token) {
+        try {
+            Date expiration = parseToken(token).getExpiration();
+            return expiration.getTime() - System.currentTimeMillis();
+        } catch (Exception e) {
+            return 0L;  // 已过期或无效，直接返回 0，logout 里会跳过存黑名单
+        }
+    }
+
     public Long getUserId(String token) {
         return Long.valueOf(parseToken(token).getSubject());
     }

@@ -46,6 +46,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        // 黑名单检查
+        if (cacheManager.isBlacklisted(token)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         Claims claims = jwtUtils.parseToken(token);
         Long userId = Long.valueOf(claims.getSubject());
         String username = claims.get("username", String.class);

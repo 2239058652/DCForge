@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 @Component
 public class UserAuthCacheManagerUtils {
 
+    private static final String BLACKLIST_KEY_PREFIX = "blacklist:";
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
     private final UserMapper userMapper;
@@ -91,6 +92,17 @@ public class UserAuthCacheManagerUtils {
             log.error("Failed to serialize data for cache key: {}", key, e);
         }
         return data;
+    }
+
+    public void addToBlacklist(String token, long remainingMillis) {
+        redisTemplate.opsForValue().set(
+                BLACKLIST_KEY_PREFIX + token, "1",
+                Duration.ofMillis(remainingMillis)
+        );
+    }
+
+    public boolean isBlacklisted(String token) {
+        return redisTemplate.hasKey(BLACKLIST_KEY_PREFIX + token);
     }
 
     private String rolesKey(Long userId) {

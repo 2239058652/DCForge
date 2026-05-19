@@ -15,4 +15,6 @@ public interface UserService {
     void registerUser(UserRegisterDto userRegisterDto);
 
     UserLoginVO login(@Valid UserLoginDto userLoginDto);
+
+    void logout(String token);
 }
