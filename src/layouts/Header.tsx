@@ -1,3 +1,5 @@
+import { userApi } from '@/api/user'
+import { useAppMessage } from '@/contexts/MessageContext'
 import { Icon } from '@iconify/react'
 import { Avatar, Button } from 'antd'
 import React from 'react'
@@ -10,13 +12,19 @@ interface StoredUser {
 }
 
 const Header: React.FC = () => {
+    const messageApi = useAppMessage()
     const navigate = useNavigate()
     const userInfo = localStorage.getItem('userInfo')
     const user: StoredUser | null = userInfo ? JSON.parse(userInfo) : null
 
-    const handleLogout = () => {
-        localStorage.clear()
-        navigate('/login')
+    const handleLogout = async () => {
+        const res = await userApi.logout()
+        if (res.code === 200) {
+            localStorage.clear()
+            navigate('/login')
+        } else {
+            messageApi.error(res.message || '退出登录失败')
+        }
     }
 
     return (

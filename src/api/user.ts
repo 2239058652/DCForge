@@ -26,6 +26,8 @@ export interface UserRegisterPayload {
 export interface UserLoginPayload {
     username: string
     password: string
+    captchaCode: string
+    captchaUuid: string
 }
 
 export interface UserLoginResult {
@@ -41,5 +43,7 @@ export interface UserLoginResult {
 export const userApi = {
     list: () => request.get<ApiResult<UserItem[]>>('/users/list'),
     register: (data: UserRegisterPayload) => request.post<ApiResult<unknown>>('/users/register', data),
-    login: (data: UserLoginPayload) => request.post<ApiResult<UserLoginResult>>('/users/login', data)
+    login: (data: UserLoginPayload) => request.post<ApiResult<UserLoginResult>>('/users/login', data),
+    logout: () => request.post<ApiResult<unknown>>('/users/logout'),
+    getCaptcha: () => request.get<ApiResult<{ captchaKey: string; base64Img: string }>>('/captcha/generate')
 }
