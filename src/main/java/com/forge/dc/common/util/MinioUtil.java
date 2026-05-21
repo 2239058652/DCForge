@@ -1,0 +1,88 @@
+package com.forge.dc.common.util;
+
+import io.minio.GetPresignedObjectUrlArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
+import io.minio.http.Method;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+@Component
+@RequiredArgsConstructor
+public class MinioUtil {
+
+    private final MinioClient minioClient;
+
+    @Value("${minio.bucket}")
+    private String bucket;
+
+    /**
+     * 上传文件，返回对象名（objectName）
+     * objectName 格式：prefix/uuid.ext，例如 "avatar/abc123.jpg"
+     *
+     * @param file   MultipartFile，直接接 Controller 传来的参数
+     * @param prefix 存储目录前缀，如 "avatar"、"post"
+     * @return objectName，存入数据库，后续用来生成访问链接或删除
+     */
+    public String upload(MultipartFile file, String prefix) {
+        String originalFilename = file.getOriginalFilename();
+        String ext = (originalFilename != null && originalFilename.contains("."))
+                ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                : "";
+        String objectName = prefix + "/" + UUID.randomUUID() + ext;
+
+        try {
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(objectName)
+                    .stream(file.getInputStream(), file.getSize(), -1)
+                    .contentType(file.getContentType())
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException("文件上传失败: " + e.getMessage(), e);
+        }
+        return objectName;
+    }
+
+    /**
+     * 生成预签名访问 URL（有效期 7 天）
+     * 前端用这个 URL 直接访问/显示文件
+     *
+     * @param objectName upload() 返回的 objectName
+     * @return 可直接访问的临时 URL
+     */
+    public String getUrl(String objectName) {
+        try {
+            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
+                    .bucket(bucket)
+                    .object(objectName)
+                    .method(Method.GET)
+                    .expiry(7, TimeUnit.DAYS)
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException("生成访问链接失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 删除文件
+     *
+     * @param objectName upload() 返回的 objectName
+     */
+    public void delete(String objectName) {
+        try {
+            minioClient.removeObject(RemoveObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(objectName)
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException("文件删除失败: " + e.getMessage(), e);
+        }
+    }
+}

@@ -7,6 +7,10 @@ spring:
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  servlet:
+    multipart:
+      max-file-size: 10MB      # 单个文件上传大小限制
+      max-request-size: 20MB   # 单次请求总大小限制
 
   datasource:
     url: jdbc:mysql://localhost:3306/dc_forge?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
@@ -38,3 +42,9 @@ jwt:
 #logging:
 #  level:
 #    com.forge.dc.users.mapper: DEBUG
+
+minio:
+  endpoint: http://localhost:9000   # 你的 MinIO 服务地址
+  access-key: admin                 # 你启动时设置的根账号
+  secret-key: admin123456           # 根密码
+  bucket: dcforge                   # 默认存储桶名

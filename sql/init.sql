@@ -222,3 +222,11 @@ VALUES ('POST', '/api/schedule/generate', 'PERMIT_ALL', '生成排班'),
 -- 夜班队列状态 (RotaStateController)
 INSERT INTO interface_permission (http_method, url_pattern, permission_code, description)
 VALUES ('GET', '/api/rota-state', 'PERMIT_ALL', '查看夜班队列状态');
+
+-- users 表新增字段，存 objectName 而不是 URL
+ALTER TABLE sys_user
+    ADD COLUMN avatar_object_name VARCHAR(200) DEFAULT NULL;
+
+-- 排版人员增加头像
+ALTER TABLE staff
+    ADD COLUMN avatar_object_name VARCHAR(200) DEFAULT NULL;
