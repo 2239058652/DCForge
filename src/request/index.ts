@@ -19,6 +19,14 @@ instance.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`
         }
 
+        // ✅ 关键修改：如果 data 是 FormData，删除 Content-Type，让浏览器自动设置
+        if (config.data instanceof FormData) {
+            // 删除 headers 对象中的 Content-Type 属性
+            if (config.headers) {
+                delete config.headers['Content-Type']
+            }
+        }
+
         return config
     },
     (err) => Promise.reject(err)

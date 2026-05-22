@@ -13,6 +13,7 @@ export interface StaffItem {
     isActive?: boolean
     createdAt?: string
     updatedAt?: string
+    avatarUrl?: string
 }
 
 export interface StaffPayload {
@@ -73,5 +74,6 @@ export const scheduleApi = {
     staffSchedule: (staffId: number, year: number, month: number) =>
         request.get<ApiResult<ScheduleItem[]>>(`/api/schedule/staff/${staffId}`, { year, month }),
     deleteMonth: (year: number, month: number) => request.delete<ApiResult<unknown>>('/api/schedule', { year, month }),
-    rotaState: () => request.get<ApiResult<RotaStateResult>>('/api/rota-state')
+    rotaState: () => request.get<ApiResult<RotaStateResult>>('/api/rota-state'),
+    uploadStaffAvatar: (id: number, data: FormData) => request.post<ApiResult<unknown>>(`/api/staff/${id}/avatar`, data)
 }

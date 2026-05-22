@@ -16,6 +16,7 @@
     "check-deps": "pnpm outdated"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.2.3",
     "@iconify/react": "^6.0.2",
     "ahooks": "^3.9.7",
     "antd": "^6.3.5",

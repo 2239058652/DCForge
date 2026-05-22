@@ -13,9 +13,13 @@ import {
     Space,
     Switch,
     Table,
-    Tag
+    Tag,
+    UploadFile,
+    Upload,
+    Avatar
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
+import { PlusOutlined } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
@@ -30,6 +34,7 @@ import {
 } from '@/api/schedule'
 import html2canvas from 'html2canvas'
 import './index.css'
+import { RcFile } from 'antd/es/upload'
 
 const staffTypeOptions = [
     { label: '医生', value: 0 },
@@ -78,6 +83,43 @@ const Schedule = () => {
     const [editingStaff, setEditingStaff] = useState<StaffItem | null>(null)
     const [staffScheduleModal, setStaffScheduleModal] = useState<StaffItem | null>(null)
     const [staffSchedules, setStaffSchedules] = useState<ScheduleItem[]>([])
+    // 新增状态：编辑中的头像文件列表
+    const [avatarFile, setAvatarFile] = useState<UploadFile[]>([])
+
+    // 新增：是否正在上传头像的loading
+    const [uploading, setUploading] = useState(false)
+
+    /**
+     * 将文件上传到后端，返回图片URL
+     * 你需要替换成你自己的上传API
+     */
+    const uploadAvatarRequest = async (file: RcFile): Promise<string> => {
+        // 编辑模式下必须有 staffId
+        if (!editingStaff?.id) {
+            message.error('新增人员请先保存基本信息后再上传头像')
+            throw new Error('暂未获取到人员ID')
+        }
+
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const result = await scheduleApi.uploadStaffAvatar(editingStaff.id, formData)
+
+        if (result.code !== 200) {
+            message.error(result.message || '头像上传失败')
+            throw new Error(result.message || '上传失败')
+        }
+
+        // 假设后端返回 data.url 或 data.avatarUrl，根据实际情况调整
+        const data = result.data as { url?: string } | undefined
+        const url = data?.url
+        if (!url) {
+            message.error('上传成功但未返回头像地址')
+            throw new Error('未返回头像地址')
+        }
+
+        return url
+    }
 
     const fetchStaff = useCallback(async () => {
         setLoadingStaff(true)
@@ -168,6 +210,7 @@ const Schedule = () => {
         setEditingStaff(null)
         form.resetFields()
         form.setFieldsValue({ type: 0, restDay: 1 })
+        setAvatarFile([]) // 清空上传组件
         setModalOpen(true)
     }
 
@@ -179,6 +222,20 @@ const Schedule = () => {
             restDay: staff.restDay,
             nightOrder: staff.nightOrder
         })
+
+        // 如果人员已有头像URL，初始化上传组件
+        if (staff.avatarUrl) {
+            setAvatarFile([
+                {
+                    uid: '-1',
+                    name: 'avatar.png',
+                    status: 'done',
+                    url: staff.avatarUrl
+                }
+            ])
+        } else {
+            setAvatarFile([])
+        }
         setModalOpen(true)
     }
 
@@ -186,9 +243,18 @@ const Schedule = () => {
         const values = await form.validateFields()
         setSavingStaff(true)
         try {
+            // 获取最终的头像URL（如果上传了新文件就用新URL，否则保留原值）
+            let avatarUrl = ''
+            if (avatarFile.length > 0 && avatarFile[0].url) {
+                avatarUrl = avatarFile[0].url
+            } else if (editingStaff?.avatarUrl) {
+                avatarUrl = editingStaff.avatarUrl
+            }
+
             const payload = {
                 ...values,
-                name: values.name.trim()
+                name: values.name.trim(),
+                avatarUrl // 传给后端
             }
             const result = editingStaff
                 ? await scheduleApi.updateStaff(editingStaff.id, payload)
@@ -369,6 +435,12 @@ const Schedule = () => {
             dataIndex: 'name',
             render: (_, record) => (
                 <Space>
+                    <Avatar
+                        src={record.avatarUrl}
+                        icon={!record.avatarUrl ? <Icon icon="solar:user-bold" /> : undefined}
+                        size={32}
+                        onClick={() => {}}
+                    />
                     <Icon
                         icon={
                             record.type === 0
@@ -624,6 +696,53 @@ const Schedule = () => {
                     <Form.Item name="name" label="姓名" rules={[{ required: true, message: '请输入姓名' }]}>
                         <Input maxLength={50} placeholder="请输入姓名" />
                     </Form.Item>
+                    {editingStaff && (
+                        <Form.Item
+                            label="头像"
+                            name="avatar" // 仅用于占位，实际值由状态管理
+                            valuePropName="fileList"
+                            getValueFromEvent={(e) => e?.fileList}
+                        >
+                            <Upload
+                                listType="picture-card"
+                                maxCount={1}
+                                fileList={avatarFile}
+                                beforeUpload={async (file) => {
+                                    setUploading(true)
+                                    try {
+                                        const url = await uploadAvatarRequest(file as RcFile)
+                                        setAvatarFile([
+                                            {
+                                                uid: file.uid,
+                                                name: file.name,
+                                                status: 'done',
+                                                url // 上传成功后使用返回的 URL
+                                            }
+                                        ])
+                                        message.success('头像上传成功')
+                                    } catch (error: any) {
+                                        message.error(error.message || '头像上传失败')
+                                        setAvatarFile([])
+                                    } finally {
+                                        setUploading(false)
+                                    }
+                                    // 阻止默认上传行为（我们已经手动调接口）
+                                    return false
+                                }}
+                                onRemove={() => {
+                                    setAvatarFile([])
+                                    return true
+                                }}
+                            >
+                                {avatarFile.length === 0 && (
+                                    <div>
+                                        <PlusOutlined />
+                                        <div style={{ marginTop: 8 }}>上传</div>
+                                    </div>
+                                )}
+                            </Upload>
+                        </Form.Item>
+                    )}
                     <Form.Item name="type" label="类型" rules={[{ required: true, message: '请选择类型' }]}>
                         <Select disabled={!!editingStaff} options={staffTypeOptions} />
                     </Form.Item>
