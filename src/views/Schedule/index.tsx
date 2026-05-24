@@ -89,6 +89,10 @@ const Schedule = () => {
     // 新增：是否正在上传头像的loading
     const [uploading, setUploading] = useState(false)
 
+    // 新增：头像预览弹窗状态
+    const [previewVisible, setPreviewVisible] = useState(false)
+    const [previewUrl, setPreviewUrl] = useState<string>('')
+
     /**
      * 将文件上传到后端，返回图片URL
      * 你需要替换成你自己的上传API
@@ -386,6 +390,16 @@ const Schedule = () => {
         }
     }
 
+    // 新增：处理头像点击预览
+    const handleAvatarPreview = (url: string) => {
+        if (!url) {
+            message.warning('该人员暂无头像')
+            return
+        }
+        setPreviewUrl(url)
+        setPreviewVisible(true)
+    }
+
     const renderShiftGroup = (dayItem: DailyScheduleItem | undefined, shiftType: ShiftType, staffType: StaffType) => {
         const shifts = (dayItem?.shifts || []).filter(
             (shift) => shift.shiftType === shiftType && shift.staffType === staffType
@@ -439,7 +453,8 @@ const Schedule = () => {
                         src={record.avatarUrl}
                         icon={!record.avatarUrl ? <Icon icon="solar:user-bold" /> : undefined}
                         size={32}
-                        onClick={() => {}}
+                        style={{ cursor: record.avatarUrl ? 'pointer' : 'default' }}
+                        onClick={() => handleAvatarPreview(record.avatarUrl || '')}
                     />
                     <Icon
                         icon={
@@ -826,6 +841,29 @@ const Schedule = () => {
                         </div>
                     </div>
                 )}
+            </Modal>
+
+            {/* 头像预览弹窗 */}
+            <Modal
+                title="头像预览"
+                open={previewVisible}
+                footer={null}
+                onCancel={() => setPreviewVisible(false)}
+                width={520}
+                centered
+            >
+                <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                    <img
+                        src={previewUrl}
+                        alt="头像预览"
+                        style={{
+                            maxWidth: '100%',
+                            maxHeight: '500px',
+                            objectFit: 'contain',
+                            borderRadius: '8px'
+                        }}
+                    />
+                </div>
             </Modal>
         </div>
     )
