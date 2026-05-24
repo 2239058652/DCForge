@@ -2,15 +2,18 @@ package com.forge.dc.modules.staff.controller;
 
 import com.forge.dc.common.result.PageResult;
 import com.forge.dc.common.result.Result;
+import com.forge.dc.modules.file.vo.FileUploadVO;
 import com.forge.dc.modules.staff.dto.StaffPageDto;
 import com.forge.dc.modules.staff.dto.StaffRequest;
 import com.forge.dc.modules.staff.entity.Staff;
 import com.forge.dc.modules.staff.service.StaffService;
+import com.forge.dc.modules.staff.vo.StaffVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,7 +27,7 @@ public class StaffController {
 
     @GetMapping
     @Operation(summary = "获取所有人员")
-    public Result<List<Staff>> list() {
+    public Result<List<StaffVo>> list() {
         return Result.success(staffService.listAll());
     }
 
@@ -58,5 +61,12 @@ public class StaffController {
     public Result<Void> activate(@PathVariable Long id) {
         staffService.activateStaff(id);
         return Result.success();
+    }
+
+    @PostMapping("/{id}/avatar")
+    @Operation(summary = "排班人员上传头像")
+    public Result<FileUploadVO> uploadAvatar(@PathVariable Long id,
+                                             @RequestParam MultipartFile file) {
+        return Result.success("上传成功", staffService.updateAvatar(id, file));
     }
 }

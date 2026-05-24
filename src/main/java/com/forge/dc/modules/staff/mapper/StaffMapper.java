@@ -31,7 +31,7 @@ public interface StaffMapper {
     void insert(Staff staff);
 
     @Update("UPDATE staff SET name=#{name}, rest_day=#{restDay}, " +
-            "night_order=#{nightOrder}, updated_at=NOW() WHERE id=#{id}")
+            "night_order=#{nightOrder}, avatar_object_name=#{avatarObjectName}, updated_at=NOW() WHERE id=#{id}")
     void update(Staff staff);
 
     @Update("UPDATE staff SET is_active=#{isActive}, updated_at=NOW() WHERE id=#{id}")

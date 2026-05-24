@@ -1,6 +1,8 @@
 package com.forge.dc.modules.staff.service.impl;
 
 import com.forge.dc.common.result.PageResult;
+import com.forge.dc.modules.file.service.FileService;
+import com.forge.dc.modules.file.vo.FileUploadVO;
 import com.forge.dc.modules.staff.dto.StaffPageDto;
 import com.forge.dc.modules.staff.dto.StaffRequest;
 import com.forge.dc.modules.staff.entity.RotaState;
@@ -8,11 +10,14 @@ import com.forge.dc.modules.staff.entity.Staff;
 import com.forge.dc.modules.staff.mapper.RotaStateMapper;
 import com.forge.dc.modules.staff.mapper.StaffMapper;
 import com.forge.dc.modules.staff.service.StaffService;
+import com.forge.dc.modules.staff.vo.StaffVo;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,10 +27,19 @@ public class StaffServiceImpl implements StaffService {
 
     private final StaffMapper staffMapper;
     private final RotaStateMapper rotaStateMapper;
+    private final FileService fileService;
 
     @Override
-    public List<Staff> listAll() {
-        return staffMapper.findAll();
+    public List<StaffVo> listAll() {
+        return staffMapper.findAll().stream()
+                .map(staff -> {
+                    StaffVo vo = StaffVo.from(staff);
+                    if (StringUtils.hasText(staff.getAvatarObjectName())) {
+                        vo.setAvatarUrl(fileService.getUrl(staff.getAvatarObjectName()));
+                    }
+                    return vo;
+                })
+                .toList();
     }
 
     @Override
@@ -133,5 +147,41 @@ public class StaffServiceImpl implements StaffService {
                 pageInfo.getPageNum(),
                 pageInfo.getPageSize()
         );
+    }
+
+    @Override
+    public FileUploadVO updateAvatar(Long id, MultipartFile file) {
+        Staff staff = staffMapper.findById(id);
+        if (staff == null) throw new RuntimeException("人员不存在");
+
+        // 删旧文件
+        if (StringUtils.hasText(staff.getAvatarObjectName())) {
+            fileService.delete(staff.getAvatarObjectName());
+        }
+        // 上传新文件
+        FileUploadVO result = fileService.upload(file, "avatar");
+        staff.setAvatarObjectName(result.getObjectName());
+
+        staffMapper.update(staff);
+        // 构建返回给前端的 VO（包含临时访问URL）
+        String presignedUrl = fileService.getUrl(result.getObjectName());
+        return FileUploadVO.builder()
+                .objectName(result.getObjectName())   // 可选，前端一般不关心
+                .url(presignedUrl)                    // 前端直接拿来展示
+                .build();
+    }
+
+    public List<StaffVo> listStaff() {
+        return staffMapper.findAll().stream()
+                .map(staff -> {
+                    StaffVo vo = new StaffVo();
+                    vo.setId(staff.getId());
+                    vo.setName(staff.getName());
+                    if (StringUtils.hasText(staff.getAvatarObjectName())) {
+                        vo.setAvatarUrl(fileService.getUrl(staff.getAvatarObjectName()));
+                    }
+                    return vo;
+                })
+                .toList();
     }
 }

@@ -18,6 +18,7 @@ public class Staff {
     private Integer restDay;
     private Integer nightOrder;
     private Boolean isActive;
+    private String avatarObjectName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
