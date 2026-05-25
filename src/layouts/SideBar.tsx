@@ -8,7 +8,13 @@ import { routesToMenuItems } from '@/utils/menu-generator'
 const SideBar = () => {
     const location = useLocation()
     const navigate = useNavigate()
-    const selectedKey = location.pathname.replace('/', '')
+
+    // 去掉开头的 / 得到如 "clinic/schedule" 的 key
+    const selectedKey = location.pathname.replace(/^\//, '')
+
+    // 展开的父级菜单 key（如 "clinic"）
+    const openKeys = selectedKey.includes('/') ? [selectedKey.split('/')[0]] : []
+
     const menuItems = useMemo(() => {
         const layoutRoute = routeConfig.find((route) => route.name === 'layout')
         return routesToMenuItems(layoutRoute?.children || [])
@@ -43,6 +49,7 @@ const SideBar = () => {
                     mode="inline"
                     items={menuItems}
                     selectedKeys={[selectedKey]}
+                    defaultOpenKeys={openKeys}
                     onClick={handleMenuClick}
                 />
             </ConfigProvider>

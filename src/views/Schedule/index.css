@@ -71,8 +71,7 @@
     font-weight: 700;
 }
 
-.schedule-toolbar,
-.staff-toolbar {
+.schedule-toolbar {
     padding: 16px 24px;
     display: flex;
     align-items: center;
@@ -132,6 +131,10 @@
     background: #ecfeff;
     color: #0e7490;
     font-weight: 700;
+}
+
+.rota-person-name:hover {
+    text-decoration: underline;
 }
 
 .schedule-board {
@@ -230,69 +233,6 @@
     font-size: 12px;
 }
 
-.staff-card {
-    margin-top: 18px;
-    padding-bottom: 24px;
-}
-
-.section-title {
-    margin: 0;
-    color: #0f172a;
-    font-size: 18px;
-    font-weight: 800;
-}
-
-.section-desc {
-    margin: 6px 0 0;
-    color: #64748b;
-    font-size: 13px;
-}
-
-.staff-search {
-    width: 360px;
-    max-width: 100%;
-}
-
-.staff-card .ant-table-wrapper {
-    padding: 0 24px;
-}
-
-.staff-name {
-    color: #0f172a;
-    font-weight: 700;
-}
-
-.staff-row-disabled {
-    color: #94a3b8;
-    background: #f8fafc;
-}
-
-.full-width {
-    width: 100%;
-}
-
-.staff-schedule-list {
-    display: grid;
-    gap: 8px;
-}
-
-.staff-schedule-item {
-    min-height: 38px;
-    padding: 8px 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    background: #f8fafc;
-}
-
-.staff-schedule-item span {
-    min-width: 48px;
-    color: #334155;
-    font-weight: 700;
-}
-
 /* 个人排班弹窗专用日历网格 */
 .personal-calendar-grid {
     display: grid;
@@ -328,8 +268,7 @@
 
 @media (max-width: 900px) {
     .schedule-hero,
-    .schedule-toolbar,
-    .staff-toolbar {
+    .schedule-toolbar {
         align-items: stretch;
         flex-direction: column;
     }

@@ -5,6 +5,7 @@ import NotFound from '@/views/NotFound'
 import Notes from '@/views/Notes'
 import Rbac from '@/views/Rbac'
 import Schedule from '@/views/Schedule'
+import StaffManagement from '@/views/StaffManagement'
 import System from '@/views/System'
 import Users from '@/views/Users'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
@@ -28,36 +29,72 @@ export const routeConfig = processRoutes([
                 }
             },
             {
-                path: 'schedule',
-                element: <Schedule />,
+                path: 'clinic',
+                name: 'clinic',
                 meta: {
-                    title: '排班管理',
+                    title: '诊所管理',
                     requiredAuth: true
-                }
+                },
+                children: [
+                    {
+                        path: '',
+                        element: <Navigate to="/clinic/schedule" replace />
+                    },
+                    {
+                        path: 'schedule',
+                        element: <Schedule />,
+                        meta: {
+                            title: '排班表',
+                            requiredAuth: true
+                        }
+                    },
+                    {
+                        path: 'staff',
+                        element: <StaffManagement />,
+                        meta: {
+                            title: '员工管理',
+                            requiredAuth: true
+                        }
+                    }
+                ]
             },
             {
-                path: 'users',
-                element: <Users />,
+                path: 'settings',
+                name: 'settings',
                 meta: {
-                    title: '用户管理',
+                    title: '系统设置',
                     requiredAuth: true
-                }
-            },
-            {
-                path: 'rbac',
-                element: <Rbac />,
-                meta: {
-                    title: '权限管理',
-                    requiredAuth: true
-                }
-            },
-            {
-                path: 'system',
-                element: <System />,
-                meta: {
-                    title: '系统管理',
-                    requiredAuth: true
-                }
+                },
+                children: [
+                    {
+                        path: '',
+                        element: <Navigate to="/settings/users" replace />
+                    },
+                    {
+                        path: 'users',
+                        element: <Users />,
+                        meta: {
+                            title: '用户管理',
+                            requiredAuth: true
+                        }
+                    },
+                    {
+                        path: 'rbac',
+                        element: <Rbac />,
+                        meta: {
+                            title: '权限管理',
+                            requiredAuth: true
+                        }
+                    },
+                    {
+                        path: 'system',
+                        element: <System />,
+                        meta: {
+                            title: '接口权限',
+                            requiredAuth: true
+                        }
+                    }
+                ]
             }
         ]
     },

@@ -1,0 +1,104 @@
+.staff-page {
+    min-height: 100%;
+    padding: 24px;
+}
+
+.staff-container {
+    max-width: 1480px;
+}
+
+.staff-card {
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 12px 34px rgba(15, 23, 42, 0.05);
+}
+
+.staff-hero {
+    padding: 22px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    color: #ffffff;
+    background: #07111f;
+}
+
+.staff-kicker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #67e8f9;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.staff-title {
+    margin: 8px 0 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.staff-desc {
+    margin-top: 8px;
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+.staff-toolbar {
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.section-title {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.section-desc {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.staff-search {
+    width: 360px;
+    max-width: 100%;
+}
+
+.staff-table-wrapper {
+    padding: 0 24px 24px;
+}
+
+.staff-table-wrapper .ant-table-wrapper {
+    padding: 0;
+}
+
+.staff-name {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.staff-row-disabled {
+    color: #94a3b8;
+    background: #f8fafc;
+}
+
+.full-width {
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    .staff-hero,
+    .staff-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
