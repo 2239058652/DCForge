@@ -33,7 +33,7 @@ public class StaffController {
 
     @GetMapping("/page")
     @Operation(summary = "分页查询所有人员")
-    public Result<PageResult<Staff>> page(@Valid StaffPageDto dto) {
+    public Result<PageResult<StaffVo>> page(@Valid StaffPageDto dto) {
         return Result.success(staffService.findStaffByPage(dto));
     }
 

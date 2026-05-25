@@ -134,16 +134,26 @@ public class StaffServiceImpl implements StaffService {
     }
 
     @Override
-    public PageResult<Staff> findStaffByPage(StaffPageDto dto) {
+    public PageResult<StaffVo> findStaffByPage(StaffPageDto dto) {
         // 启动分页，必须紧挨着查询方法
         PageHelper.startPage(dto.getPageNum(), dto.getPageSize());
 
         List<Staff> list = staffMapper.findByCondition(dto.getName(), dto.getType());
         PageInfo<Staff> pageInfo = new PageInfo<>(list);
 
+        List<StaffVo> staffVoList = pageInfo.getList().stream()
+                .map(staff -> {
+                    StaffVo vo = StaffVo.from(staff);
+                    if (StringUtils.hasText(staff.getAvatarObjectName())) {
+                        vo.setAvatarUrl(fileService.getUrl(staff.getAvatarObjectName()));
+                    }
+                    return vo;
+                })
+                .toList();
+
         return new PageResult<>(
                 pageInfo.getTotal(),
-                pageInfo.getList(),
+                staffVoList,
                 pageInfo.getPageNum(),
                 pageInfo.getPageSize()
         );

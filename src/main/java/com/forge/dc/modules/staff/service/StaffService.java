@@ -21,7 +21,7 @@ public interface StaffService {
 
     void activateStaff(Long id);
 
-    PageResult<Staff> findStaffByPage(StaffPageDto dto);
+    PageResult<StaffVo> findStaffByPage(StaffPageDto dto);
 
     FileUploadVO updateAvatar(Long id, MultipartFile file);
 }
