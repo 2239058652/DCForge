@@ -712,12 +712,7 @@ const Schedule = () => {
                         <Input maxLength={50} placeholder="请输入姓名" />
                     </Form.Item>
                     {editingStaff && (
-                        <Form.Item
-                            label="头像"
-                            name="avatar" // 仅用于占位，实际值由状态管理
-                            valuePropName="fileList"
-                            getValueFromEvent={(e) => e?.fileList}
-                        >
+                        <Form.Item label="头像">
                             <Upload
                                 listType="picture-card"
                                 maxCount={1}
