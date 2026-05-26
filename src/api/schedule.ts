@@ -23,6 +23,22 @@ export interface StaffPayload {
     nightOrder?: number
 }
 
+/** 分页查询参数 */
+export interface StaffPageDto {
+    pageNum: number
+    pageSize: number
+    name?: string
+    type?: StaffType
+}
+
+/** 后端分页结果 */
+export interface PageResult<T> {
+    total: number
+    records: T[]
+    pageNum: number
+    pageSize: number
+}
+
 export interface ShiftItem {
     staffId: number
     staffName: string
@@ -64,6 +80,8 @@ export interface RotaStateResult {
 
 export const scheduleApi = {
     staffList: () => request.get<ApiResult<StaffItem[]>>('/api/staff'),
+    /** 分页查询人员列表 */
+    staffListByPage: (params: StaffPageDto) => request.get<ApiResult<PageResult<StaffItem>>>('/api/staff/page', params),
     addStaff: (data: StaffPayload) => request.post<ApiResult<StaffItem>>('/api/staff', data),
     updateStaff: (id: number, data: StaffPayload) => request.put<ApiResult<StaffItem>>(`/api/staff/${id}`, data),
     deactivateStaff: (id: number) => request.put<ApiResult<unknown>>(`/api/staff/${id}/deactivate`),

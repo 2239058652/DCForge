@@ -13,6 +13,26 @@ const httpMethodOptions = [
     { label: 'PATCH', value: 'PATCH' }
 ]
 
+const permissionCodeOptions = [
+    { label: 'note:add', value: 'note:add' },
+    { label: 'note:delete', value: 'note:delete' },
+    { label: 'note:detail', value: 'note:detail' },
+    { label: 'note:list', value: 'note:list' },
+    { label: 'note:update', value: 'note:update' },
+    { label: 'permission:add', value: 'permission:add' },
+    { label: 'permission:delete', value: 'permission:delete' },
+    { label: 'permission:list', value: 'permission:list' },
+    { label: 'permission:update', value: 'permission:update' },
+    { label: 'role:add', value: 'role:add' },
+    { label: 'role:assign-permission', value: 'role:assign-permission' },
+    { label: 'role:delete', value: 'role:delete' },
+    { label: 'role:list', value: 'role:list' },
+    { label: 'role:update', value: 'role:update' },
+    { label: 'system:admin', value: 'system:admin' },
+    { label: 'user:assign-role', value: 'user:assign-role' },
+    { label: 'user:list', value: 'user:list' }
+]
+
 const methodColorMap: Record<string, string> = {
     GET: 'green',
     POST: 'blue',
@@ -251,9 +271,9 @@ const System = () => {
                     <Form.Item
                         name="permissionCode"
                         label="所需权限编码"
-                        rules={[{ required: true, message: '请输入权限编码' }]}
+                        rules={[{ required: true, message: '请选择权限编码' }]}
                     >
-                        <Input maxLength={100} placeholder="例如 note:list" />
+                        <Select placeholder="请选择权限编码" options={permissionCodeOptions} />
                     </Form.Item>
                     <Form.Item name="description" label="描述">
                         <Input maxLength={200} placeholder="可选，备注此规则用途" />

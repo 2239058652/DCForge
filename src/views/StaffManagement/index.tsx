@@ -22,6 +22,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
     scheduleApi,
     type StaffItem,
+    type StaffPageDto,
     type StaffPayload,
     type StaffType
 } from '@/api/schedule'
@@ -62,6 +63,8 @@ const StaffManagement = () => {
     const [avatarFile, setAvatarFile] = useState<UploadFile[]>([])
     const [previewVisible, setPreviewVisible] = useState(false)
     const [previewUrl, setPreviewUrl] = useState<string>('')
+    // 分页状态
+    const [pagination, setPagination] = useState({ current: 1, pageSize: 8, total: 0 })
 
     const uploadAvatarRequest = async (file: RcFile): Promise<string> => {
         if (!editingStaff?.id) {
@@ -89,37 +92,61 @@ const StaffManagement = () => {
         return url
     }
 
-    const fetchStaff = useCallback(async () => {
-        setLoadingStaff(true)
-        try {
-            const result = await scheduleApi.staffList()
-            if (result.code !== 200) {
-                message.error(result.message || '获取人员列表失败')
-                return
+    /**
+     * 分页获取人员列表
+     * @param page - 页码（传 0 表示使用当前页）
+     * @param pageSize - 每页条数（传 0 表示使用当前页大小）
+     * @param searchKeyword - 搜索词（不传则使用当前 keyword）
+     */
+    const fetchStaff = useCallback(
+        async (page = 0, pageSize = 0, searchKeyword?: string) => {
+            const query = searchKeyword ?? keyword
+            const params: StaffPageDto = {
+                pageNum: page || pagination.current,
+                pageSize: pageSize || pagination.pageSize,
+                ...(query.trim() ? { name: query.trim() } : {})
             }
-            setStaffList(result.data || [])
-        } catch {
-            message.error('获取人员列表失败')
-        } finally {
-            setLoadingStaff(false)
-        }
-    }, [message])
+
+            setLoadingStaff(true)
+            try {
+                const result = await scheduleApi.staffListByPage(params)
+                if (result.code !== 200) {
+                    message.error(result.message || '获取人员列表失败')
+                    return
+                }
+                const pageData = result.data!
+                setStaffList(pageData.records || [])
+                setPagination({
+                    current: pageData.pageNum,
+                    pageSize: pageData.pageSize,
+                    total: pageData.total
+                })
+            } catch {
+                message.error('获取人员列表失败')
+            } finally {
+                setLoadingStaff(false)
+            }
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [message, keyword, pagination.current, pagination.pageSize]
+    )
 
     useEffect(() => {
         (async () => {
-            await fetchStaff()
+            await fetchStaff(1)
         })()
-    }, [fetchStaff])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
-    const filteredStaff = (() => {
-        const query = keyword.trim().toLowerCase()
-        if (!query) return staffList
-        return staffList.filter((staff) =>
-            [staff.name, staffTypeText[staff.type], restDayOptions[staff.restDay]?.label].some((value) =>
-                value?.toLowerCase().includes(query)
-            )
-        )
-    })()
+    /** 搜索时重置到第一页 */
+    const handleSearch = (value: string) => {
+        setKeyword(value)
+        setPagination((prev) => ({ ...prev, current: 1 }))
+        // 搜索后需要重新请求，通过 setTimeout 确保 keyword 状态已更新
+        setTimeout(() => {
+            fetchStaff(1, pagination.pageSize, value)
+        }, 0)
+    }
 
     const openCreateModal = () => {
         setEditingStaff(null)
@@ -181,7 +208,7 @@ const StaffManagement = () => {
             setModalOpen(false)
             setEditingStaff(null)
             form.resetFields()
-            await fetchStaff()
+            await fetchStaff(0)
         } catch {
             message.error('保存人员失败')
         } finally {
@@ -201,7 +228,7 @@ const StaffManagement = () => {
                 return
             }
             message.success(staff.isActive === false ? '人员已启用' : '人员已停用')
-            await fetchStaff()
+            await fetchStaff(0)
         } catch {
             message.error('更新人员状态失败')
         } finally {
@@ -326,7 +353,7 @@ const StaffManagement = () => {
                             prefix={<Icon icon="solar:magnifer-linear" color="#94a3b8" />}
                             value={keyword}
                             onChange={(event) => setKeyword(event.target.value)}
-                            onSearch={(value) => setKeyword(value)}
+                            onSearch={handleSearch}
                         />
                     </div>
 
@@ -335,10 +362,19 @@ const StaffManagement = () => {
                             rowKey="id"
                             loading={loadingStaff}
                             columns={staffColumns}
-                            dataSource={filteredStaff}
+                            dataSource={staffList}
                             rowClassName={(record) => (record.isActive === false ? 'staff-row-disabled' : '')}
                             locale={{ emptyText: <Empty description="暂无人员" /> }}
-                            pagination={{ pageSize: 8, showSizeChanger: true, showTotal: (total) => `共 ${total} 条` }}
+                            pagination={{
+                                current: pagination.current,
+                                pageSize: pagination.pageSize,
+                                total: pagination.total,
+                                showSizeChanger: true,
+                                showTotal: (total) => `共 ${total} 条`,
+                                onChange: (page, pageSize) => {
+                                    fetchStaff(page, pageSize)
+                                }
+                            }}
                         />
                     </div>
                 </section>

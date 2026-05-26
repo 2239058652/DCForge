@@ -1,5 +1,6 @@
 allowBuilds:
   '@parcel/watcher': true
+  es5-ext: true
 ignoredBuiltDependencies:
   - '@parcel/watcher'
   - '@swc/core'
