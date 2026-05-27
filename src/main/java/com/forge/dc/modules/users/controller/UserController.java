@@ -32,9 +32,18 @@ public class UserController {
      */
     @Operation(summary = "注册用户")
     @PostMapping("/register")
-    public Result<Void> registerUser(@RequestBody @Valid UserRegisterDto userRegisterDto) {
-        userService.registerUser(userRegisterDto);
-        return Result.success();
+    public Result<UserLoginVO> registerUser(@RequestBody @Valid UserRegisterDto userRegisterDto) {
+        return Result.success(userService.registerUser(userRegisterDto));
+    }
+
+    /**
+     * 用户登录
+     *
+     */
+    @Operation(summary = "用户登录")
+    @PostMapping("/login")
+    public Result<UserLoginVO> login(@RequestBody @Valid UserLoginDto userLoginDto) {
+        return Result.success("登录成功", userService.login(userLoginDto));
     }
 
     /**
@@ -46,16 +55,6 @@ public class UserController {
     @PreAuthorize("hasAuthority('user:list')")
     public Result<List<SysUserListVO>> findAllUsersList() {
         return Result.success(userService.findUsersAll());
-    }
-
-    /**
-     * 用户登录
-     *
-     */
-    @Operation(summary = "用户登录")
-    @PostMapping("/login")
-    public Result<UserLoginVO> login(@RequestBody @Valid UserLoginDto userLoginDto) {
-        return Result.success("登录成功", userService.login(userLoginDto));
     }
 
     /**

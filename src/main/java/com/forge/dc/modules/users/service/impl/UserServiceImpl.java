@@ -50,9 +50,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void registerUser(UserRegisterDto userRegisterDto) {
+    public UserLoginVO registerUser(UserRegisterDto userRegisterDto) {
+        // 检查用户名唯一
         checkUsernameUnique(userRegisterDto.getUsername());
 
+        // 密码加密
         String encodedPassword = passwordEncoder.encode(userRegisterDto.getPassword());
 
         SysUserEntity sysUserEntity = new SysUserEntity();
@@ -67,6 +69,9 @@ public class UserServiceImpl implements UserService {
                 throw new BusinessException(ResultCode.SYSTEM_ERROR.getCode(), "add user failed");
             }
             bindDefaultRole(sysUserEntity.getId());
+
+            return buildLoginVO(sysUserEntity.getId(), sysUserEntity.getUsername(),
+                    sysUserEntity.getNickname(), sysUserEntity.getAvatar());
         } catch (DuplicateKeyException e) {
             log.warn("register user failed, username exists: {}", userRegisterDto.getUsername(), e);
             throw new BusinessException(ResultCode.ALREADY_EXISTS.getCode(), "username already exists");
@@ -93,24 +98,7 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ResultCode.FORBIDDEN.getCode(), "user disabled");
         }
 
-        List<String> roles = userMapper.findRoleCodesByUserId(user.getId());
-        List<String> permissions = userMapper.findPermissionCodesByUserId(user.getId());
-
-        // 写入 Redis 缓存
-        cacheManager.save(user.getId(), roles, permissions);
-
-        String token = jwtUtils.generateToken(user.getId(), user.getUsername());
-
-        UserLoginVO vo = new UserLoginVO();
-        vo.setId(user.getId());
-        vo.setUsername(user.getUsername());
-        vo.setNickname(user.getNickname());
-        vo.setAvatar(user.getAvatar());
-        vo.setRoles(roles);
-        vo.setPermissions(permissions);
-        vo.setToken(token);
-
-        return vo;
+        return buildLoginVO(user.getId(), user.getUsername(), user.getNickname(), user.getAvatar());
     }
 
     @Override
@@ -136,12 +124,33 @@ public class UserServiceImpl implements UserService {
         return vo;
     }
 
+    // 检查用户名唯一
     private void checkUsernameUnique(String username) {
         if (userMapper.existsByUsername(username)) {
             throw new BusinessException(ResultCode.ALREADY_EXISTS.getCode(), "username already exists");
         }
     }
 
+    private UserLoginVO buildLoginVO(Long userId, String username, String nickname, String avatar) {
+        List<String> roles = userMapper.findRoleCodesByUserId(userId);
+        List<String> permissions = userMapper.findPermissionCodesByUserId(userId);
+
+        cacheManager.save(userId, roles, permissions);
+
+        String token = jwtUtils.generateToken(userId, username);
+
+        UserLoginVO vo = new UserLoginVO();
+        vo.setId(userId);
+        vo.setUsername(username);
+        vo.setNickname(nickname);
+        vo.setAvatar(avatar);
+        vo.setRoles(roles);
+        vo.setPermissions(permissions);
+        vo.setToken(token);
+        return vo;
+    }
+
+    // 绑定默认角色
     private void bindDefaultRole(Long userId) {
         Long roleId = userMapper.findRoleIdByCode(DEFAULT_ROLE_CODE);
         if (roleId == null) {

@@ -1,5 +1,8 @@
 package com.forge.dc.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.forge.dc.common.result.Result;
+import com.forge.dc.common.result.ResultCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,6 +39,8 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
     private final InterfacePermissionRuleLoader ruleLoader;
     // PathPatternParser 线程安全，复用同一个实例
     private final PathPatternParser patternParser = new PathPatternParser();
+
+    private final ObjectMapper objectMapper;
 
     private boolean isWhitelisted(String uri) {
         PathContainer pathContainer = PathContainer.parsePath(uri);
@@ -74,23 +79,29 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
         if (requiredPermission != null) {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
+            // 1. 未认证
             if (auth == null || !auth.isAuthenticated()) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
+                writeResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                        Result.fail(ResultCode.UNAUTHORIZED, "请先登录"));
+                return; // ✅ 写入响应后必须 return，截断请求
             }
 
             boolean hasPermission = auth.getAuthorities().stream()
                     .anyMatch(a -> a.getAuthority().equals(requiredPermission));
 
+            // 2. 有角色但无该权限
             if (!hasPermission) {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                return;
+                writeResponse(response, HttpServletResponse.SC_FORBIDDEN,
+                        Result.fail(ResultCode.FORBIDDEN, "无权限访问"));
+                return; // ✅ 写入响应后必须 return，截断请求
             }
+
             // ✅ 有权限，走到这里直接放行
         } else {
-            // 未命中规则，默认拒绝
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            return;
+            // 3. 未命中任何规则，默认拒绝
+            writeResponse(response, HttpServletResponse.SC_FORBIDDEN,
+                    Result.fail(ResultCode.FORBIDDEN, "未命中规则，拒绝访问"));
+            return; // ✅ 写入响应后必须 return，截断请求
         }
 
         chain.doFilter(request, response);
@@ -114,5 +125,14 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
             }
         }
         return null;
+    }
+
+    /**
+     * ✅ 核心修复：在 Filter 层直接将 Result 写入 Response
+     */
+    private void writeResponse(HttpServletResponse response, int status, Result<?> result) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(result));
     }
 }

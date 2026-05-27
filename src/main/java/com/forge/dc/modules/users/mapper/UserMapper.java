@@ -18,7 +18,7 @@ public interface UserMapper {
 
     Long findRoleIdByCode(String roleCode);
 
-    int bindUserRole(@Param("userId") Long userId, @Param("roleId") Long roleId);
+    void bindUserRole(@Param("userId") Long userId, @Param("roleId") Long roleId);
 
     List<String> findRoleCodesByUserId(Long userId);
 

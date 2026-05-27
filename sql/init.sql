@@ -230,3 +230,7 @@ ALTER TABLE sys_user
 -- 排版人员增加头像
 ALTER TABLE staff
     ADD COLUMN avatar_object_name VARCHAR(200) DEFAULT NULL;
+
+-- note表的内容换成MEDIUMTEXT富文本格式存储
+ALTER TABLE note
+    MODIFY COLUMN content MEDIUMTEXT NOT NULL COMMENT '富文本内容（含Base64图片）';

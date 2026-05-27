@@ -12,7 +12,7 @@ public interface UserService {
 
     List<SysUserListVO> findUsersAll();
 
-    void registerUser(UserRegisterDto userRegisterDto);
+    UserLoginVO registerUser(UserRegisterDto userRegisterDto);
 
     UserLoginVO login(@Valid UserLoginDto userLoginDto);
 
