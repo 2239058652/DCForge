@@ -2,7 +2,12 @@ import { Icon } from '@iconify/react'
 import { App, Button, Empty, Form, Input, Modal, Popconfirm, Select, Table, Tag } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useCallback, useEffect, useState } from 'react'
-import { interfacePermissionApi, type InterfacePermissionItem, type InterfacePermissionPayload } from '@/api/system'
+import {
+    interfacePermissionApi,
+    type InterfacePermissionItem,
+    type InterfacePermissionPayload,
+    type PermissionCodeItem
+} from '@/api/system'
 import './index.css'
 
 const httpMethodOptions = [
@@ -11,26 +16,6 @@ const httpMethodOptions = [
     { label: 'PUT', value: 'PUT' },
     { label: 'DELETE', value: 'DELETE' },
     { label: 'PATCH', value: 'PATCH' }
-]
-
-const permissionCodeOptions = [
-    { label: 'note:add', value: 'note:add' },
-    { label: 'note:delete', value: 'note:delete' },
-    { label: 'note:detail', value: 'note:detail' },
-    { label: 'note:list', value: 'note:list' },
-    { label: 'note:update', value: 'note:update' },
-    { label: 'permission:add', value: 'permission:add' },
-    { label: 'permission:delete', value: 'permission:delete' },
-    { label: 'permission:list', value: 'permission:list' },
-    { label: 'permission:update', value: 'permission:update' },
-    { label: 'role:add', value: 'role:add' },
-    { label: 'role:assign-permission', value: 'role:assign-permission' },
-    { label: 'role:delete', value: 'role:delete' },
-    { label: 'role:list', value: 'role:list' },
-    { label: 'role:update', value: 'role:update' },
-    { label: 'system:admin', value: 'system:admin' },
-    { label: 'user:assign-role', value: 'user:assign-role' },
-    { label: 'user:list', value: 'user:list' }
 ]
 
 const methodColorMap: Record<string, string> = {
@@ -49,6 +34,8 @@ const System = () => {
     const [saving, setSaving] = useState(false)
     const [refreshing, setRefreshing] = useState(false)
     const [modalOpen, setModalOpen] = useState(false)
+    const [permissionCodes, setPermissionCodes] = useState<PermissionCodeItem[]>([])
+    const [loadingPermissionCodes, setLoadingPermissionCodes] = useState(false)
 
     const fetchRules = useCallback(async () => {
         setLoading(true)
@@ -70,10 +57,27 @@ const System = () => {
         fetchRules()
     }, [fetchRules])
 
+    const fetchPermissionCodes = useCallback(async () => {
+        setLoadingPermissionCodes(true)
+        try {
+            const result = await interfacePermissionApi.getPermissionCodes()
+            if (result.code !== 200) {
+                message.error(result.message || '获取权限码列表失败')
+                return
+            }
+            setPermissionCodes(result.data || [])
+        } catch {
+            message.error('获取权限码列表失败，请检查后端服务')
+        } finally {
+            setLoadingPermissionCodes(false)
+        }
+    }, [message])
+
     const openAddModal = () => {
         form.resetFields()
         form.setFieldsValue({ httpMethod: 'GET' })
         setModalOpen(true)
+        fetchPermissionCodes()
     }
 
     const handleSubmit = async () => {
@@ -273,7 +277,15 @@ const System = () => {
                         label="所需权限编码"
                         rules={[{ required: true, message: '请选择权限编码' }]}
                     >
-                        <Select placeholder="请选择权限编码" options={permissionCodeOptions} />
+                        <Select
+                            placeholder="请选择权限编码"
+                            loading={loadingPermissionCodes}
+                            options={permissionCodes}
+                            showSearch
+                            filterOption={(input, option) =>
+                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                            }
+                        />
                     </Form.Item>
                     <Form.Item name="description" label="描述">
                         <Input maxLength={200} placeholder="可选，备注此规则用途" />
