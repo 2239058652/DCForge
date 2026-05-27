@@ -1,8 +1,9 @@
 import { Icon } from '@iconify/react'
 import { App, Button, Empty, Form, Input, Modal, Popconfirm, Space, Table } from 'antd'
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { noteApi, type NoteItem } from '@/api/note'
+import RichTextEditor, { type RichTextEditorRef } from '@/components/RichTextEditor/index'
 import './index.css'
 
 interface NoteForm {
@@ -12,6 +13,7 @@ interface NoteForm {
 const Notes = () => {
     const { message } = App.useApp()
     const [form] = Form.useForm<NoteForm>()
+    const richTextEditorRef = useRef<RichTextEditorRef>(null)
     const [notes, setNotes] = useState<NoteItem[]>([])
     const [total, setTotal] = useState(0)
     const [pageNum, setPageNum] = useState(1)
@@ -56,12 +58,14 @@ const Notes = () => {
     const openCreateModal = () => {
         setEditingNote(null)
         form.resetFields()
+        richTextEditorRef.current?.clear()
         setModalOpen(true)
     }
 
     const openEditModal = (note: NoteItem) => {
         setEditingNote(note)
         form.setFieldsValue({ content: note.content })
+        richTextEditorRef.current?.setHtml(note.content)
         setModalOpen(true)
     }
 
@@ -251,18 +255,33 @@ const Notes = () => {
                 onCancel={() => setModalOpen(false)}
                 onOk={handleSubmit}
                 destroyOnHidden
+                width="60%"
             >
                 <Form form={form} layout="vertical" className="pt-3">
-                    <Form.Item name="content" label="内容" rules={[{ required: true, message: '请输入 note 内容' }]}>
-                        <Input.TextArea rows={6} maxLength={500} showCount placeholder="请输入 note 内容" />
+                    <Form.Item
+                        name="content"
+                        label="内容"
+                        rules={[
+                            {
+                                validator: () => {
+                                    if (richTextEditorRef.current?.isEmpty()) {
+                                        return Promise.reject(new Error('请输入 note 内容'))
+                                    }
+                                    return Promise.resolve()
+                                }
+                            }
+                        ]}
+                        trigger="onChange"
+                    >
+                        <RichTextEditor ref={richTextEditorRef} height={300} placeholder="请输入 note 内容..." />
                     </Form.Item>
                 </Form>
             </Modal>
 
-            <Modal title="Note 详情" open={!!detailNote} footer={null} onCancel={() => setDetailNote(null)} destroyOnHidden>
+            <Modal title="Note 详情" open={!!detailNote} footer={null} onCancel={() => setDetailNote(null)} destroyOnHidden width="60%">
                 {detailNote && (
                     <div>
-                        <div className="note-detail-box">{detailNote.content}</div>
+                        <RichTextEditor value={detailNote.content} height={500} readonly placeholder="暂无内容..." />
                         <div className="note-detail-meta">
                             <span>ID：{detailNote.id}</span>
                             <span>创建：{detailNote.createdAt || '-'}</span>
