@@ -4,6 +4,7 @@ import type { ColumnsType, TablePaginationConfig } from 'antd/es/table'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { noteApi, type NoteItem } from '@/api/note'
 import RichTextEditor, { type RichTextEditorRef } from '@/components/RichTextEditor/index'
+import RichTextPreview from '@/components/RichTextPreview/index'
 import './index.css'
 
 interface NoteForm {
@@ -147,7 +148,7 @@ const Notes = () => {
         {
             title: '内容',
             dataIndex: 'content',
-            ellipsis: true
+            render: (value: string) => <RichTextPreview content={value} maxLength={80} showPopover />
         },
         {
             title: '创建时间',

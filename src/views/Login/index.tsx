@@ -118,7 +118,20 @@ const Login = () => {
                 return
             }
 
-            await login(username, password, '', '') // 注册后理论上后台直接登录，这里可调整
+            // 优先使用注册接口返回的 token 直接登录（无需验证码）
+            const data = registerResult.data as Record<string, unknown> | undefined
+            if (data && typeof data.token === 'string' && data.token) {
+                saveLogin(data as unknown as UserLoginResult)
+                message.success(registerResult.message || '注册并登录成功')
+                navigate(from, { replace: true })
+                return
+            }
+
+            // 注册接口未返回 token，回退：切到登录模式让用户输入验证码后手动登录
+            message.success(registerResult.message || '注册成功，请输入验证码登录')
+            setMode('login')
+            form.resetFields()
+            form.setFieldsValue({ username, password })
         } catch {
             message.error(mode === 'login' ? '登录失败，请检查后端服务' : '注册失败，请检查后端服务')
             if (mode === 'login') getCaptcha()

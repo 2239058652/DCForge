@@ -1,0 +1,50 @@
+.richtext-preview-text {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.richtext-preview-image-count {
+    color: #1677ff;
+    font-size: 12px;
+    padding: 2px 6px;
+    background: #e6f4ff;
+    border-radius: 4px;
+}
+
+.richtext-preview-full {
+    max-width: 580px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.richtext-preview-html {
+    padding: 12px;
+    line-height: 1.6;
+    word-break: break-all;
+}
+
+.richtext-preview-html img {
+    max-width: 100%;
+    height: auto;
+    margin: 8px 0;
+    border-radius: 4px;
+}
+
+.richtext-preview-images {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.richtext-preview-images-title {
+    font-size: 14px;
+    color: #8c8c8c;
+    margin-bottom: 12px;
+}
+
+.richtext-preview-images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+}
