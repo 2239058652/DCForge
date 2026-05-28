@@ -14,12 +14,8 @@ const RichTextPreview = ({ content, maxLength = 100, showPopover = false }: Rich
         const tempDiv = document.createElement('div')
         tempDiv.innerHTML = content
 
-        // 处理图片标签，替换为 [图片] 文本
-        const images = tempDiv.querySelectorAll('img')
-        images.forEach((img) => {
-            const placeholder = document.createTextNode(' [图片] ')
-            img.parentNode?.replaceChild(placeholder, img)
-        })
+        // 移除图片标签（缩略图单独展示）
+        tempDiv.querySelectorAll('img').forEach((img) => img.remove())
 
         return tempDiv.textContent || tempDiv.innerText || ''
     }, [content])
@@ -44,17 +40,29 @@ const RichTextPreview = ({ content, maxLength = 100, showPopover = false }: Rich
         return plainText.slice(0, maxLength) + '...'
     }, [plainText, maxLength])
 
-    // 有图片时的提示
     const imageCount = images.length
     const hasImages = imageCount > 0
-    const imageIndicator = hasImages ? ` [${imageCount}张图片]` : ''
 
     // 渲染内容
     const renderContent = () => {
         return (
             <div className="richtext-preview-text">
                 <span>{truncatedText}</span>
-                {imageIndicator && <span className="richtext-preview-image-count">{imageIndicator}</span>}
+                {hasImages && (
+                    <span className="richtext-preview-thumbnails">
+                        {images.map((img) => (
+                            <Image
+                                key={img.id}
+                                src={img.src}
+                                alt=""
+                                width={28}
+                                height={28}
+                                style={{ objectFit: 'cover', borderRadius: 2, marginLeft: 4, verticalAlign: 'middle' }}
+                                preview={{ mask: '查看' }}
+                            />
+                        ))}
+                    </span>
+                )}
             </div>
         )
     }

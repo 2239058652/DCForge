@@ -37,6 +37,7 @@ const Rbac = () => {
     const [permissionModalOpen, setPermissionModalOpen] = useState(false)
     const [editingRole, setEditingRole] = useState<RoleItem | null>(null)
     const [editingPermission, setEditingPermission] = useState<PermissionItem | null>(null)
+    const [rolePermissionsLoading, setRolePermissionsLoading] = useState(false)
 
     const enabledRoles = useMemo(() => roles.filter((role) => role.status === 1), [roles])
     const enabledPermissions = useMemo(() => permissions.filter((permission) => permission.status === 1), [permissions])
@@ -350,13 +351,30 @@ const Rbac = () => {
                             label: `${role.roleName} (${role.roleCode})`,
                             value: role.id
                         }))}
-                        onChange={() => assignForm.setFieldValue('permissionIds', [])}
+                        onChange={async (roleId: number) => {
+                            assignForm.setFieldValue('permissionIds', [])
+                            if (!roleId) return
+                            setRolePermissionsLoading(true)
+                            try {
+                                const res = await rbacApi.getRolePermissions(roleId)
+                                if (res.code === 200 && res.data) {
+                                    assignForm.setFieldValue('permissionIds', res.data.map((p) => p.id))
+                                } else {
+                                    message.error(res.message || '获取角色权限失败')
+                                }
+                            } catch {
+                                message.error('获取角色权限失败')
+                            } finally {
+                                setRolePermissionsLoading(false)
+                            }
+                        }}
                     />
                 </Form.Item>
                 <Form.Item name="permissionIds" label="权限" rules={[{ required: true, message: '请选择权限' }]}>
                     <Select
                         mode="multiple"
                         placeholder="请选择权限"
+                        loading={rolePermissionsLoading}
                         options={enabledPermissions.map((permission) => ({
                             label: `${permission.permissionName} (${permission.permissionCode})`,
                             value: permission.id
@@ -445,7 +463,7 @@ const Rbac = () => {
             >
                 <Form form={permissionForm} layout="vertical" className="pt-3">
                     <Form.Item name="permissionCode" label="权限编码" rules={[{ required: true, message: '请输入权限编码' }]}>
-                        <Input maxLength={100} placeholder="例如 note:list" />
+                        <Input maxLength={100} placeholder="例如 note:list" disabled={!!editingPermission} />
                     </Form.Item>
                     <Form.Item name="permissionName" label="权限名称" rules={[{ required: true, message: '请输入权限名称' }]}>
                         <Input maxLength={100} placeholder="例如 List notes" />

@@ -6,7 +6,8 @@ import {
     interfacePermissionApi,
     type InterfacePermissionItem,
     type InterfacePermissionPayload,
-    type PermissionCodeItem
+    type PermissionCodeItem,
+    type InterfacePageParams
 } from '@/api/system'
 import './index.css'
 
@@ -36,16 +37,27 @@ const System = () => {
     const [modalOpen, setModalOpen] = useState(false)
     const [permissionCodes, setPermissionCodes] = useState<PermissionCodeItem[]>([])
     const [loadingPermissionCodes, setLoadingPermissionCodes] = useState(false)
+    const [pageNum, setPageNum] = useState(1)
+    const [pageSize, setPageSize] = useState(10)
+    const [total, setTotal] = useState(0)
+    const [searchName, setSearchName] = useState('')
+    const [searchType, setSearchType] = useState<number | undefined>(undefined)
 
-    const fetchRules = useCallback(async () => {
+    const fetchRules = useCallback(async (page: number, size: number, name?: string, type?: number) => {
         setLoading(true)
         try {
-            const result = await interfacePermissionApi.list()
+            const params: InterfacePageParams = { pageNum: page, pageSize: size }
+            if (name) params.name = name
+            if (type !== undefined) params.type = type
+            const result = await interfacePermissionApi.page(params)
             if (result.code !== 200) {
                 message.error(result.message || '获取接口权限规则失败')
                 return
             }
-            setRules(result.data || [])
+            setRules(result.data?.records || [])
+            setTotal(result.data?.total || 0)
+            setPageNum(result.data?.pageNum || page)
+            setPageSize(result.data?.pageSize || size)
         } catch {
             message.error('获取接口权限规则失败，请检查后端服务')
         } finally {
@@ -54,8 +66,24 @@ const System = () => {
     }, [message])
 
     useEffect(() => {
-        fetchRules()
-    }, [fetchRules])
+        fetchRules(1, pageSize)
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handleSearch = () => {
+        fetchRules(1, pageSize, searchName, searchType)
+    }
+
+    const handleReset = () => {
+        setSearchName('')
+        setSearchType(undefined)
+        fetchRules(1, pageSize)
+    }
+
+    const handleTableChange = (pagination: { current?: number; pageSize?: number }) => {
+        const newPage = pagination.current || 1
+        const newSize = pagination.pageSize || 10
+        fetchRules(newPage, newSize, searchName, searchType)
+    }
 
     const fetchPermissionCodes = useCallback(async () => {
         setLoadingPermissionCodes(true)
@@ -206,7 +234,7 @@ const System = () => {
                     </div>
 
                     <div className="system-stats">
-                        {[['规则总数', rules.length]].map(([label, value]) => (
+                        {[['规则总数', total]].map(([label, value]) => (
                             <div key={label} className="system-stat">
                                 <div className="system-stat-label">{label}</div>
                                 <div className="system-stat-value">{value}</div>
@@ -217,7 +245,29 @@ const System = () => {
 
                 <div className="system-content">
                     <div className="system-toolbar">
-                        <span style={{ color: '#64748b', fontSize: 13 }}>共 {rules.length} 条规则</span>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <Input
+                                placeholder="按名称搜索"
+                                value={searchName}
+                                onChange={(e) => setSearchName(e.target.value)}
+                                onPressEnter={handleSearch}
+                                style={{ width: 180 }}
+                                allowClear
+                            />
+                            <Select
+                                placeholder="按类型筛选"
+                                value={searchType}
+                                onChange={(v) => setSearchType(v)}
+                                allowClear
+                                style={{ width: 150 }}
+                                options={[
+                                    { label: '类型 1', value: 1 },
+                                    { label: '类型 2', value: 2 }
+                                ]}
+                            />
+                            <Button type="primary" onClick={handleSearch}>搜索</Button>
+                            <Button onClick={handleReset}>重置</Button>
+                        </div>
                         <div className="system-toolbar-actions">
                             <Button
                                 icon={<Icon icon="solar:refresh-bold" />}
@@ -239,10 +289,13 @@ const System = () => {
                         dataSource={rules}
                         locale={{ emptyText: <Empty description="暂无接口权限规则" /> }}
                         pagination={{
-                            pageSize: 10,
+                            current: pageNum,
+                            pageSize: pageSize,
+                            total: total,
                             showSizeChanger: true,
-                            showTotal: (total) => `共 ${total} 条`
+                            showTotal: (t) => `共 ${t} 条`
                         }}
+                        onChange={handleTableChange}
                     />
                 </div>
             </section>

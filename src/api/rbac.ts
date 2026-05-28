@@ -55,5 +55,6 @@ export const rbacApi = {
     updatePermission: (id: number, data: PermissionPayload) => request.put<ApiResult<unknown>>(`/rbac/permissions/${id}`, data),
     deletePermission: (id: number) => request.delete<ApiResult<unknown>>(`/rbac/permissions/${id}`),
     assignUserRoles: (data: UserRoleAssignPayload) => request.put<ApiResult<unknown>>('/rbac/user-roles', data),
-    assignRolePermissions: (data: RolePermissionAssignPayload) => request.put<ApiResult<unknown>>('/rbac/role-permissions', data)
+    assignRolePermissions: (data: RolePermissionAssignPayload) => request.put<ApiResult<unknown>>('/rbac/role-permissions', data),
+    getRolePermissions: (roleId: number) => request.get<ApiResult<PermissionItem[]>>(`/rbac/roles/${roleId}/permissions`)
 }
