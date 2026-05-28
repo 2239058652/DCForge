@@ -109,4 +109,11 @@ public class RbacController {
         rbacService.assignRolePermissions(dto);
         return Result.success();
     }
+
+    @GetMapping("/roles/{id}/permissions")
+    @PreAuthorize("hasAuthority('role:list')")
+    @Operation(summary = "查询角色的权限列表")
+    public Result<List<SysPermissionEntity>> findPermissionsByRoleId(@PathVariable Long id) {
+        return Result.success(rbacService.findPermissionsByRoleId(id));
+    }
 }

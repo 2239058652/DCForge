@@ -124,6 +124,11 @@ public class RbacServiceImpl implements RbacService {
         userIds.forEach(cacheManager::evict);
     }
 
+    @Override
+    public List<SysPermissionEntity> findPermissionsByRoleId(Long roleId) {
+        return rbacMapper.findPermissionsByRoleId(roleId);
+    }
+
     private void checkRows(int rows, String message) {
         if (rows <= 0) {
             throw new BusinessException(ResultCode.SYSTEM_ERROR.getCode(), message);

@@ -30,4 +30,6 @@ public interface RbacService {
     void assignUserRoles(UserRoleAssignDto dto);
 
     void assignRolePermissions(RolePermissionAssignDto dto);
+
+    List<SysPermissionEntity> findPermissionsByRoleId(Long roleId);
 }

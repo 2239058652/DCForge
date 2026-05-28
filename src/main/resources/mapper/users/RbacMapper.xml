@@ -78,6 +78,22 @@
         SELECT user_id FROM sys_user_role WHERE role_id = #{roleId}
     </select>
 
+    <select id="findPermissionsByRoleId" resultType="com.forge.dc.modules.users.entity.SysPermissionEntity">
+        select p.id,
+               p.permission_code,
+               p.permission_name,
+               p.resource_type,
+               p.path,
+               p.status,
+               p.created_at,
+               p.updated_at
+        from sys_role_permission rp
+                 inner join sys_permission p on p.id = rp.permission_id
+        where rp.role_id = #{roleId}
+          and p.status = 1
+        order by p.id
+    </select>
+
     <insert id="addPermission" parameterType="com.forge.dc.modules.users.entity.SysPermissionEntity"
             useGeneratedKeys="true" keyProperty="id">
         insert into sys_permission (permission_code, permission_name, resource_type, path, status)
