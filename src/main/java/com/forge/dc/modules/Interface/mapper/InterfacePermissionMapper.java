@@ -22,5 +22,7 @@ public interface InterfacePermissionMapper {
     int update(InterfacePermission permission);
 
     @Delete("DELETE FROM interface_permission WHERE id=#{id}")
-    int deleteById(Long id);
+    void deleteById(Long id);
+
+    List<InterfacePermission> findInterfacePageByCondition(String name, Integer type);
 }

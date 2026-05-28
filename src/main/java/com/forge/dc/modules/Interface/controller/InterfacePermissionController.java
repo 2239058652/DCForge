@@ -1,8 +1,11 @@
 package com.forge.dc.modules.Interface.controller;
 
+import com.forge.dc.common.result.PageResult;
 import com.forge.dc.common.result.Result;
+import com.forge.dc.modules.Interface.dto.InterfacePageDto;
 import com.forge.dc.modules.Interface.entity.InterfacePermission;
 import com.forge.dc.modules.Interface.service.InterfacePermissionService;
+import com.forge.dc.modules.Interface.vo.InterfacePermissionVo;
 import com.forge.dc.security.InterfacePermissionRuleLoader;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,21 +22,28 @@ import java.util.List;
 @Tag(name = "动态权限RBAC管理")
 public class InterfacePermissionController {
 
-    private final InterfacePermissionService permissionService;
+    private final InterfacePermissionService interfacePermissionService;
     private final InterfacePermissionRuleLoader ruleLoader;
 
     @GetMapping
     @PreAuthorize("hasAuthority('system:admin')")
     @Operation(summary = "查询接口权限规则列表")
     public Result<List<InterfacePermission>> list() {
-        return Result.success(permissionService.listAll());
+        return Result.success(interfacePermissionService.listAll());
+    }
+
+    @GetMapping("/page")
+    @PreAuthorize("hasAuthority('system:admin')")
+    @Operation(summary = "查询接口权限规则分页列表")
+    public Result<PageResult<InterfacePermissionVo>> listPage(@Valid InterfacePageDto dto) {
+        return Result.success(interfacePermissionService.interfacePage(dto));
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('system:admin')")
     @Operation(summary = "新增接口权限规则")
     public Result<Void> add(@RequestBody @Valid InterfacePermission permission) {
-        permissionService.save(permission);
+        interfacePermissionService.save(permission);
         ruleLoader.refresh();
         return Result.success();
     }
@@ -42,7 +52,7 @@ public class InterfacePermissionController {
     @PreAuthorize("hasAuthority('system:admin')")
     @Operation(summary = "删除接口权限规则")
     public Result<Void> remove(@PathVariable Long id) {
-        permissionService.removeById(id);
+        interfacePermissionService.removeById(id);
         ruleLoader.refresh();
         return Result.success();
     }
