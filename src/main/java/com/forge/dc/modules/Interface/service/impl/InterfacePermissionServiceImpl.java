@@ -25,7 +25,7 @@ public class InterfacePermissionServiceImpl implements InterfacePermissionServic
     }
 
     @Override
-    public void save(InterfacePermission permission) {
+    public void addOrEdit(InterfacePermission permission) {
         if (permission.getId() == null) {
             mapper.insert(permission);
         } else {

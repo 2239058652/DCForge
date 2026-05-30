@@ -41,9 +41,9 @@ public class InterfacePermissionController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('system:admin')")
-    @Operation(summary = "新增接口权限规则")
+    @Operation(summary = "新增/修改-接口权限规则", description = "新增接口权限规则时id为空，修改接口权限规则时id不能为空")
     public Result<Void> add(@RequestBody @Valid InterfacePermission permission) {
-        interfacePermissionService.save(permission);
+        interfacePermissionService.addOrEdit(permission);
         ruleLoader.refresh();
         return Result.success();
     }

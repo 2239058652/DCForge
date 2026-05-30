@@ -9,7 +9,7 @@
         select * from interface_permission
         <where>
             <if test="name != null and name != ''">
-                and name like CONCAT('%', #{name}, '%')
+                and description like CONCAT('%', #{name}, '%')
             </if>
             <if test="type != null">
                 and type = #{type}
