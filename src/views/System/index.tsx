@@ -35,6 +35,7 @@ const System = () => {
     const [saving, setSaving] = useState(false)
     const [refreshing, setRefreshing] = useState(false)
     const [modalOpen, setModalOpen] = useState(false)
+    const [editingRule, setEditingRule] = useState<InterfacePermissionItem | null>(null)
     const [permissionCodes, setPermissionCodes] = useState<PermissionCodeItem[]>([])
     const [loadingPermissionCodes, setLoadingPermissionCodes] = useState(false)
     const [pageNum, setPageNum] = useState(1)
@@ -43,27 +44,30 @@ const System = () => {
     const [searchName, setSearchName] = useState('')
     const [searchType, setSearchType] = useState<number | undefined>(undefined)
 
-    const fetchRules = useCallback(async (page: number, size: number, name?: string, type?: number) => {
-        setLoading(true)
-        try {
-            const params: InterfacePageParams = { pageNum: page, pageSize: size }
-            if (name) params.name = name
-            if (type !== undefined) params.type = type
-            const result = await interfacePermissionApi.page(params)
-            if (result.code !== 200) {
-                message.error(result.message || '获取接口权限规则失败')
-                return
+    const fetchRules = useCallback(
+        async (page: number, size: number, name?: string, type?: number) => {
+            setLoading(true)
+            try {
+                const params: InterfacePageParams = { pageNum: page, pageSize: size }
+                if (name) params.name = name
+                if (type !== undefined) params.type = type
+                const result = await interfacePermissionApi.page(params)
+                if (result.code !== 200) {
+                    message.error(result.message || '获取接口权限规则失败')
+                    return
+                }
+                setRules(result.data?.records || [])
+                setTotal(result.data?.total || 0)
+                setPageNum(result.data?.pageNum || page)
+                setPageSize(result.data?.pageSize || size)
+            } catch {
+                message.error('获取接口权限规则失败，请检查后端服务')
+            } finally {
+                setLoading(false)
             }
-            setRules(result.data?.records || [])
-            setTotal(result.data?.total || 0)
-            setPageNum(result.data?.pageNum || page)
-            setPageSize(result.data?.pageSize || size)
-        } catch {
-            message.error('获取接口权限规则失败，请检查后端服务')
-        } finally {
-            setLoading(false)
-        }
-    }, [message])
+        },
+        [message]
+    )
 
     useEffect(() => {
         fetchRules(1, pageSize)
@@ -104,6 +108,15 @@ const System = () => {
     const openAddModal = () => {
         form.resetFields()
         form.setFieldsValue({ httpMethod: 'GET' })
+        setEditingRule(null)
+        setModalOpen(true)
+        fetchPermissionCodes()
+    }
+
+    const openEditModal = (record: InterfacePermissionItem) => {
+        form.resetFields()
+        form.setFieldsValue(record)
+        setEditingRule(record)
         setModalOpen(true)
         fetchPermissionCodes()
     }
@@ -118,17 +131,21 @@ const System = () => {
                 permissionCode: values.permissionCode.trim(),
                 description: values.description?.trim()
             }
+            if (editingRule) {
+                payload.id = editingRule.id
+            }
             const result = await interfacePermissionApi.add(payload)
             if (result.code !== 200) {
-                message.error(result.message || '新增规则失败')
+                message.error(result.message || (editingRule ? '修改规则失败' : '新增规则失败'))
                 return
             }
-            message.success('规则已新增')
+            message.success(editingRule ? '规则已修改' : '规则已新增')
             setModalOpen(false)
             form.resetFields()
-            await fetchRules()
+            setEditingRule(null)
+            await fetchRules(pageNum, pageSize, searchName, searchType)
         } catch {
-            message.error('新增规则失败')
+            message.error(editingRule ? '修改规则失败' : '新增规则失败')
         } finally {
             setSaving(false)
         }
@@ -143,7 +160,7 @@ const System = () => {
                 return
             }
             message.success('规则已删除')
-            await fetchRules()
+            await fetchRules(pageNum, pageSize, searchName, searchType)
         } catch {
             message.error('删除规则失败')
         } finally {
@@ -171,7 +188,7 @@ const System = () => {
         {
             title: 'ID',
             dataIndex: 'id',
-            width: 80
+            width: 60
         },
         {
             title: 'HTTP 方法',
@@ -204,18 +221,23 @@ const System = () => {
         },
         {
             title: '操作',
-            width: 100,
+            width: 180,
             render: (_, record) => (
-                <Popconfirm
-                    title="确认删除该规则？"
-                    okText="删除"
-                    cancelText="取消"
-                    onConfirm={() => handleRemove(record.id)}
-                >
-                    <Button type="link" danger>
-                        删除
+                <>
+                    <Button type="link" onClick={() => openEditModal(record)}>
+                        编辑
                     </Button>
-                </Popconfirm>
+                    <Popconfirm
+                        title="确认删除该规则？"
+                        okText="删除"
+                        cancelText="取消"
+                        onConfirm={() => handleRemove(record.id)}
+                    >
+                        <Button type="link" danger>
+                            删除
+                        </Button>
+                    </Popconfirm>
+                </>
             )
         }
     ]
@@ -265,7 +287,9 @@ const System = () => {
                                     { label: '类型 2', value: 2 }
                                 ]}
                             />
-                            <Button type="primary" onClick={handleSearch}>搜索</Button>
+                            <Button type="primary" onClick={handleSearch}>
+                                搜索
+                            </Button>
                             <Button onClick={handleReset}>重置</Button>
                         </div>
                         <div className="system-toolbar-actions">
@@ -287,6 +311,7 @@ const System = () => {
                         loading={loading}
                         columns={columns}
                         dataSource={rules}
+                        bordered
                         locale={{ emptyText: <Empty description="暂无接口权限规则" /> }}
                         pagination={{
                             current: pageNum,
@@ -301,7 +326,7 @@ const System = () => {
             </section>
 
             <Modal
-                title="新增接口权限规则"
+                title={editingRule ? '编辑接口权限规则' : '新增接口权限规则'}
                 open={modalOpen}
                 okText="保存"
                 cancelText="取消"
@@ -334,10 +359,10 @@ const System = () => {
                             placeholder="请选择权限编码"
                             loading={loadingPermissionCodes}
                             options={permissionCodes}
-                            showSearch
-                            filterOption={(input, option) =>
-                                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                            }
+                            showSearch={{
+                                filterOption: (input, option) =>
+                                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                            }}
                         />
                     </Form.Item>
                     <Form.Item name="description" label="描述">

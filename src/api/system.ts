@@ -11,6 +11,7 @@ export interface InterfacePermissionItem {
 }
 
 export interface InterfacePermissionPayload {
+    id?: number
     httpMethod: string
     urlPattern: string
     permissionCode: string
@@ -44,5 +45,5 @@ export const interfacePermissionApi = {
     add: (data: InterfacePermissionPayload) => request.post<ApiResult<unknown>>('/admin/interface-permissions', data),
     remove: (id: number) => request.delete<ApiResult<unknown>>(`/admin/interface-permissions/${id}`),
     refresh: () => request.post<ApiResult<unknown>>('/admin/interface-permissions/refresh'),
-    getPermissionCodes: () => request.get<ApiResult<PermissionCodeItem[]>>('/dictionary/permisson-code/list')
+    getPermissionCodes: () => request.get<ApiResult<PermissionCodeItem[]>>('/dictionary/permission-code/list')
 }
