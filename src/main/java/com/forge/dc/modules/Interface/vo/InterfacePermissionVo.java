@@ -11,6 +11,7 @@ public class InterfacePermissionVo {
     private String httpMethod;
     private String urlPattern;
     private String permissionCode;
+    private String type;
     private String description;
     private LocalDateTime createdAt;
 
@@ -20,6 +21,7 @@ public class InterfacePermissionVo {
         vo.setHttpMethod(interfacePermission.getHttpMethod());
         vo.setUrlPattern(interfacePermission.getUrlPattern());
         vo.setPermissionCode(interfacePermission.getPermissionCode());
+        vo.setType(interfacePermission.getType());
         vo.setDescription(interfacePermission.getDescription());
         vo.setCreatedAt(interfacePermission.getCreatedAt());
         return vo;

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.forge.dc.modules.dictionary.mapper.DictMapper">
+
+    <select id="selectByDictCode" resultType="com.forge.dc.modules.dictionary.entity.SysDictEntity">
+        select id, dict_code, dict_label, dict_value, sort_order, status, created_at
+        from sys_dict
+        where dict_code = #{dictCode}
+          and status = 1
+        order by sort_order, id
+    </select>
+
+    <insert id="insert" parameterType="com.forge.dc.modules.dictionary.entity.SysDictEntity"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into sys_dict (dict_code, dict_label, dict_value, sort_order, status)
+        values (#{dictCode}, #{dictLabel}, #{dictValue}, #{sortOrder}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.forge.dc.modules.dictionary.entity.SysDictEntity">
+        update sys_dict
+        set dict_code   = #{dictCode},
+            dict_label  = #{dictLabel},
+            dict_value  = #{dictValue},
+            sort_order  = #{sortOrder},
+            status      = #{status}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from sys_dict where id = #{id}
+    </delete>
+
+    <select id="selectPage" resultType="com.forge.dc.modules.dictionary.entity.SysDictEntity">
+        select id, dict_code, dict_label, dict_value, sort_order, status, created_at
+        from sys_dict
+        <where>
+            <if test="dictCode != null and dictCode != ''">
+                and dict_code = #{dictCode}
+            </if>
+        </where>
+        order by sort_order, id
+    </select>
+
+</mapper>

@@ -234,3 +234,21 @@ ALTER TABLE staff
 -- note表的内容换成MEDIUMTEXT富文本格式存储
 ALTER TABLE note
     MODIFY COLUMN content MEDIUMTEXT NOT NULL COMMENT '富文本内容（含Base64图片）';
+
+-- 创建字典表
+CREATE TABLE sys_dict
+(
+    id         BIGINT PRIMARY KEY AUTO_INCREMENT,
+    dict_code  VARCHAR(50) NOT NULL COMMENT '字典编码，如 interface_type',
+    dict_label VARCHAR(50) NOT NULL COMMENT '显示名，如 用户管理',
+    dict_value VARCHAR(50) NOT NULL COMMENT '存储值，如 user',
+    sort_order INT         NOT NULL DEFAULT 0 COMMENT '排序',
+    status     TINYINT     NOT NULL DEFAULT 1,
+    created_at DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uk_code_value (dict_code, dict_value)
+) COMMENT '字典表';
+
+-- interface_permission 加字段
+alter table interface_permission
+    add column type varchar(50) not null default '' comment '接口分类，关联 sys_dict(dict_value)';

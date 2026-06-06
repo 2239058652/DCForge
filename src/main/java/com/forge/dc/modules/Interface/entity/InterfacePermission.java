@@ -10,6 +10,7 @@ public class InterfacePermission {
     private String httpMethod;
     private String urlPattern;
     private String permissionCode;
+    private String type;
     private String description;
     private LocalDateTime createdAt;
 }

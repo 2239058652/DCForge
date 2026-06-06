@@ -14,5 +14,5 @@ public class InterfacePageDto {
     private int pageSize = 10; // 默认每页10条
 
     private String name;       // 可选：按姓名模糊搜索
-    private Integer type;      // 可选：按类型精确筛选
+    private String type;       // 可选：按类型精确筛选
 }
