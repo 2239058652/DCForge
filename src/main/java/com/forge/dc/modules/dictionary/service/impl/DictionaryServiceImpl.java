@@ -84,12 +84,15 @@ public class DictionaryServiceImpl implements DictionaryService {
         }
 
         if (rows <= 0) {
-            throw new BusinessException(ResultCode.SYSTEM_ERROR.getCode(), "save dict failed");
+            throw new BusinessException(ResultCode.SYSTEM_ERROR.getCode(), "保存字典失败");
         }
     }
 
     @Override
     public void removeById(Long id) {
-        dictMapper.deleteById(id);
+        int rows = dictMapper.deleteById(id);
+        if (rows <= 0) {
+            throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "字典项不存在或删除失败");
+        }
     }
 }

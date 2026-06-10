@@ -11,7 +11,7 @@
             <if test="name != null and name != ''">
                 and description like CONCAT('%', #{name}, '%')
             </if>
-            <if test="type != null">
+            <if test="type != null and type != ''">
                 and type = #{type}
             </if>
         </where>
