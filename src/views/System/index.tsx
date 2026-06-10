@@ -9,6 +9,7 @@ import {
     type PermissionCodeItem,
     type InterfacePageParams
 } from '@/api/system'
+import { dictionaryApi, type DictOption } from '@/api/dictionary'
 import './index.css'
 
 const httpMethodOptions = [
@@ -38,6 +39,8 @@ const System = () => {
     const [editingRule, setEditingRule] = useState<InterfacePermissionItem | null>(null)
     const [permissionCodes, setPermissionCodes] = useState<PermissionCodeItem[]>([])
     const [loadingPermissionCodes, setLoadingPermissionCodes] = useState(false)
+    const [typeOptions, setTypeOptions] = useState<DictOption[]>([])
+    const [loadingTypeOptions, setLoadingTypeOptions] = useState(false)
     const [pageNum, setPageNum] = useState(1)
     const [pageSize, setPageSize] = useState(10)
     const [total, setTotal] = useState(0)
@@ -71,6 +74,7 @@ const System = () => {
 
     useEffect(() => {
         fetchRules(1, pageSize)
+        fetchTypeOptions()
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleSearch = () => {
@@ -105,12 +109,29 @@ const System = () => {
         }
     }, [message])
 
+    const fetchTypeOptions = useCallback(async () => {
+        setLoadingTypeOptions(true)
+        try {
+            const result = await dictionaryApi.getByCode('interface_type')
+            if (result.code !== 200) {
+                message.error(result.message || '获取类型选项失败')
+                return
+            }
+            setTypeOptions(result.data || [])
+        } catch {
+            message.error('获取类型选项失败，请检查后端服务')
+        } finally {
+            setLoadingTypeOptions(false)
+        }
+    }, [message])
+
     const openAddModal = () => {
         form.resetFields()
         form.setFieldsValue({ httpMethod: 'GET' })
         setEditingRule(null)
         setModalOpen(true)
         fetchPermissionCodes()
+        fetchTypeOptions()
     }
 
     const openEditModal = (record: InterfacePermissionItem) => {
@@ -119,6 +140,7 @@ const System = () => {
         setEditingRule(record)
         setModalOpen(true)
         fetchPermissionCodes()
+        fetchTypeOptions()
     }
 
     const handleSubmit = async () => {
@@ -282,10 +304,8 @@ const System = () => {
                                 onChange={(v) => setSearchType(v)}
                                 allowClear
                                 style={{ width: 150 }}
-                                options={[
-                                    { label: '类型 1', value: 1 },
-                                    { label: '类型 2', value: 2 }
-                                ]}
+                                loading={loadingTypeOptions}
+                                options={typeOptions}
                             />
                             <Button type="primary" onClick={handleSearch}>
                                 搜索
@@ -363,6 +383,17 @@ const System = () => {
                                 filterOption: (input, option) =>
                                     (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                             }}
+                        />
+                    </Form.Item>
+                    <Form.Item
+                        name="type"
+                        label="类型"
+                    >
+                        <Select
+                            placeholder="请选择类型"
+                            loading={loadingTypeOptions}
+                            options={typeOptions}
+                            allowClear
                         />
                     </Form.Item>
                     <Form.Item name="description" label="描述">

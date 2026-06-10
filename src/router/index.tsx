@@ -8,6 +8,7 @@ import Schedule from '@/views/Schedule'
 import StaffManagement from '@/views/StaffManagement'
 import System from '@/views/System'
 import Users from '@/views/Users'
+import Dictionary from '@/views/Dictionary'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 
 export const routeConfig = processRoutes([
@@ -91,6 +92,14 @@ export const routeConfig = processRoutes([
                         element: <System />,
                         meta: {
                             title: '接口权限',
+                            requiredAuth: true
+                        }
+                    },
+                    {
+                        path: 'dictionary',
+                        element: <Dictionary />,
+                        meta: {
+                            title: '字典管理',
                             requiredAuth: true
                         }
                     }

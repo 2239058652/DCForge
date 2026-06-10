@@ -6,6 +6,7 @@ export interface InterfacePermissionItem {
     httpMethod: string
     urlPattern: string
     permissionCode: string
+    type?: number
     description?: string
     createdAt?: string
 }
@@ -15,6 +16,7 @@ export interface InterfacePermissionPayload {
     httpMethod: string
     urlPattern: string
     permissionCode: string
+    type?: number
     description?: string
 }
 

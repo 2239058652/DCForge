@@ -51,10 +51,25 @@ const Login = () => {
     }
     // 模式切换或初始化时，如果是登录模式则获取验证码
     useEffect(() => {
-        if (mode === 'login') {
-            getCaptcha()
+        if (mode !== 'login') return
+        const fetchCaptcha = async () => {
+            try {
+                setCaptchaLoading(true)
+                const res = await userApi.getCaptcha()
+                if (res.code === 200 && res.data) {
+                    setCaptchaUuid(res.data.captchaKey)
+                    setCaptchaImage(res.data.base64Img)
+                } else {
+                    message.error(res.message || '验证码获取失败')
+                }
+            } catch {
+                message.error('验证码请求失败')
+            } finally {
+                setCaptchaLoading(false)
+            }
         }
-    }, [mode])
+        void fetchCaptcha()
+    }, [mode, message])
 
     const saveLogin = (user: UserLoginResult) => {
         const tokenName = import.meta.env.VITE_TOKEN_NAME || 'token'
