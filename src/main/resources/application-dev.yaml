@@ -49,3 +49,16 @@ minio:
   access-key: admin                 # 你启动时设置的根账号
   secret-key: admin123456           # 根密码
   bucket: dcforge                   # 默认存储桶名
+
+agnes:
+  api-key: "sk-gcFAoBnqT9QSykK31g080IAE1bOxHGEi3qECfSmdrWS6POr4"
+  base-url: "https://apihub.agnes-ai.com"
+  model: "agnes-image-2.1-flash"
+  timeout: 360
+
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest

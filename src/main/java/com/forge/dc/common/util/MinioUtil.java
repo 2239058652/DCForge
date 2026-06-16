@@ -71,6 +71,31 @@ public class MinioUtil {
     }
 
     /**
+     * 从字节数组上传文件，返回对象名（objectName）
+     * 适用于从 URL 下载图片后再上传的场景
+     *
+     * @param data        文件字节数组
+     * @param prefix      存储目录前缀
+     * @param contentType 文件类型，如 "image/png"
+     * @param ext         文件扩展名，如 ".png"
+     * @return objectName
+     */
+    public String uploadBytes(byte[] data, String prefix, String contentType, String ext) {
+        String objectName = prefix + "/" + UUID.randomUUID() + ext;
+        try {
+            minioClient.putObject(PutObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(objectName)
+                    .stream(new java.io.ByteArrayInputStream(data), data.length, -1)
+                    .contentType(contentType)
+                    .build());
+        } catch (Exception e) {
+            throw new RuntimeException("文件上传失败: " + e.getMessage(), e);
+        }
+        return objectName;
+    }
+
+    /**
      * 删除文件
      *
      * @param objectName upload() 返回的 objectName
