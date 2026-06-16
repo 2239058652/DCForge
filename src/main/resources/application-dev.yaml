@@ -25,6 +25,12 @@ spring:
       database: 0
       password: Dingtong1998
 
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
 mybatis:
   mapper-locations: classpath*:mapper/**/*.xml
   configuration:
@@ -55,10 +61,3 @@ agnes:
   base-url: "https://apihub.agnes-ai.com"
   model: "agnes-image-2.1-flash"
   timeout: 360
-
-spring:
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
