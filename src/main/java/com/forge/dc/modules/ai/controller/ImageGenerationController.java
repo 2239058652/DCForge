@@ -5,6 +5,7 @@ import com.forge.dc.common.result.ResultCode;
 import com.forge.dc.modules.ai.dto.ImageToImageDTO;
 import com.forge.dc.modules.ai.dto.TextToImageDTO;
 import com.forge.dc.modules.ai.service.ImageGenerationService;
+import com.forge.dc.modules.ai.task.MinioCleanupTask;
 import com.forge.dc.modules.ai.vo.ImageGenerationVO;
 import com.forge.dc.common.util.MinioUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/ai/image")
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class ImageGenerationController {
 
     private final ImageGenerationService imageGenerationService;
     private final MinioUtil minioUtil;
+    private final MinioCleanupTask minioCleanupTask;
 
     @PostMapping("/text-to-image")
     @Operation(summary = "文生图")
@@ -44,5 +48,18 @@ public class ImageGenerationController {
         String objectName = minioUtil.uploadTemp(file);
         String url = minioUtil.getUrl(objectName);
         return Result.success(null, url);
+    }
+
+    /**
+     * 手动触发临时文件清理（仅用于开发测试）
+     */
+    @PostMapping("/test/cleanup")
+    @Operation(summary = "手动触发临时文件清理（测试用）")
+    public Result<Map<String, String>> triggerCleanup() {
+        minioCleanupTask.triggerCleanup();
+        return Result.success(Map.of(
+                "message", "清理任务已触发",
+                "cron", minioCleanupTask.getCronExpression()
+        ));
     }
 }

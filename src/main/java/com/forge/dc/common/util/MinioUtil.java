@@ -126,7 +126,14 @@ public class MinioUtil {
      *
      * @param duration 超过此时间的文件会被删除
      */
-    public void deleteTempOlderThan(Duration duration) {
+    /**
+     * 清理 temp-image 下超过指定时间的文件
+     *
+     * @param duration 超过此时间的文件会被删除
+     * @return 清理的文件数量
+     */
+    public int deleteTempOlderThan(Duration duration) {
+        int count = 0;
         try {
             Instant cutoff = Instant.now().minus(duration);
             ListObjectsArgs args = ListObjectsArgs.builder()
@@ -136,7 +143,6 @@ public class MinioUtil {
                     .build();
 
             Iterable<Result<Item>> results = minioClient.listObjects(args);
-            int count = 0;
             for (Result<Item> result : results) {
                 Item item = result.get();
                 if (!item.isDir() && item.lastModified().toInstant().isBefore(cutoff)) {
@@ -147,11 +153,9 @@ public class MinioUtil {
                     count++;
                 }
             }
-            if (count > 0) {
-                log.info("已清理 {} 个过期临时文件", count);
-            }
         } catch (Exception e) {
             log.warn("清理临时文件失败", e);
         }
+        return count;
     }
 }

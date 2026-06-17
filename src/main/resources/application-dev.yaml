@@ -55,6 +55,8 @@ minio:
   access-key: admin                 # 你启动时设置的根账号
   secret-key: admin123456           # 根密码
   bucket: dcforge                   # 默认存储桶名
+  cleanup:
+    cron: "0 */5 * * * ?"           # 每5分钟执行一次（仅开发环境测试用）
 
 agnes:
   api-key: "sk-gcFAoBnqT9QSykK31g080IAE1bOxHGEi3qECfSmdrWS6POr4"

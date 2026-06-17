@@ -27,3 +27,7 @@ springdoc:
     enabled: false
   api-docs:
     enabled: false
+
+minio:
+  cleanup:
+    cron: "0 0 2 * * ?"             # 每天凌晨2点（生产环境）
