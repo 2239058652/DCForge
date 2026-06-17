@@ -9,6 +9,8 @@ import StaffManagement from '@/views/StaffManagement'
 import System from '@/views/System'
 import Users from '@/views/Users'
 import Dictionary from '@/views/Dictionary'
+import AiImage from '@/views/AiImage'
+import ImageHistory from '@/views/ImageHistory'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 
 export const routeConfig = processRoutes([
@@ -54,6 +56,36 @@ export const routeConfig = processRoutes([
                         element: <StaffManagement />,
                         meta: {
                             title: '员工管理',
+                            requiredAuth: true
+                        }
+                    }
+                ]
+            },
+            {
+                path: 'ai',
+                name: 'ai',
+                meta: {
+                    title: 'AI服务',
+                    requiredAuth: true
+                },
+                children: [
+                    {
+                        path: '',
+                        element: <Navigate to="/ai/image" replace />
+                    },
+                    {
+                        path: 'image',
+                        element: <AiImage />,
+                        meta: {
+                            title: '图像管理',
+                            requiredAuth: true
+                        }
+                    },
+                    {
+                        path: 'image/history',
+                        element: <ImageHistory />,
+                        meta: {
+                            title: '图片历史',
                             requiredAuth: true
                         }
                     }

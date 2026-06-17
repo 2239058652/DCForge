@@ -10,32 +10,5 @@
     },
     "files.associations": {
         "*.css": "tailwindcss"
-    },
-    "workbench.colorCustomizations": {
-        "terminal.background": "#535a55",
-        "terminal.foreground": "#e07840",
-        "terminalCursor.foreground": "#f56028",
-
-        "terminal.ansiBlack": "#264a30",
-        "terminal.ansiRed": "#c44830",
-        "terminal.ansiGreen": "#389858",
-        "terminal.ansiYellow": "#e0a828",
-        "terminal.ansiBlue": "#408888",
-        "terminal.ansiMagenta": "#b87820",
-        "terminal.ansiCyan": "#28a878",
-        "terminal.ansiWhite": "#cc8840",
-
-        "terminal.ansiBrightBlack": "#407050",
-        "terminal.ansiBrightRed": "#f06030",
-        "terminal.ansiBrightGreen": "#50d070",
-        "terminal.ansiBrightYellow": "#e8b030",
-        "terminal.ansiBrightBlue": "#58a8a8",
-        "terminal.ansiBrightMagenta": "#d09828",
-        "terminal.ansiBrightCyan": "#38c898",
-        "terminal.ansiBrightWhite": "#eea060"
-    },
-    "terminal.integrated.fontFamily": "Fira Code, Menlo, Monaco, 'Courier New', monospace",
-    "terminal.integrated.cursorStyle": "line",
-    "terminal.integrated.cursorBlinking": true,
-    "terminal.integrated.fontSize": 14
+    }
 }
