@@ -12,4 +12,6 @@ public interface TaskService {
     TaskVO getTask(Long taskId);
 
     PageResult<TaskVO> page(TaskPageDTO dto);
+
+    void delete(Long taskId);
 }

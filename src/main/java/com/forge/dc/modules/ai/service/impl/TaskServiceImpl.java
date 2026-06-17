@@ -101,6 +101,29 @@ public class TaskServiceImpl implements TaskService {
         return new PageResult<>(pageInfo.getTotal(), voList, pageInfo.getPageNum(), pageInfo.getPageSize());
     }
 
+    @Override
+    public void delete(Long taskId) {
+        Long userId = getCurrentUserId();
+
+        AiTaskEntity entity = taskMapper.selectByIdAndUserId(taskId, userId);
+        if (entity == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "任务不存在");
+        }
+
+        // 删除 MinIO 上的图片文件
+        if (entity.getObjectName() != null && !entity.getObjectName().isEmpty()) {
+            try {
+                minioUtil.delete(entity.getObjectName());
+                log.info("已删除 MinIO 文件: {}", entity.getObjectName());
+            } catch (Exception e) {
+                log.warn("删除 MinIO 文件失败: {}, 继续删除数据库记录", entity.getObjectName(), e);
+            }
+        }
+
+        taskMapper.deleteById(taskId);
+        log.info("任务已删除: taskId={}", taskId);
+    }
+
     private TaskVO toVO(AiTaskEntity entity) {
         TaskVO vo = new TaskVO();
         vo.setId(entity.getId());

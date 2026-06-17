@@ -2,6 +2,9 @@ package com.forge.dc.modules.ai.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.forge.dc.common.util.JwtUtils;
+import com.forge.dc.common.util.MinioUtil;
+import com.forge.dc.modules.ai.entity.AiTaskEntity;
+import com.forge.dc.modules.ai.mapper.AiTaskMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,13 +21,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TaskWebSocketHandler extends TextWebSocketHandler {
 
     private final JwtUtils jwtUtils;
+    private final AiTaskMapper taskMapper;
+    private final MinioUtil minioUtil;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final Map<Long, Set<WebSocketSession>> userSessions = new ConcurrentHashMap<>();
     private final Map<Long, Set<WebSocketSession>> taskSubscribers = new ConcurrentHashMap<>();
 
-    public TaskWebSocketHandler(JwtUtils jwtUtils) {
+    public TaskWebSocketHandler(JwtUtils jwtUtils, AiTaskMapper taskMapper, MinioUtil minioUtil) {
         this.jwtUtils = jwtUtils;
+        this.taskMapper = taskMapper;
+        this.minioUtil = minioUtil;
     }
 
     @Override
@@ -58,6 +65,9 @@ public class TaskWebSocketHandler extends TextWebSocketHandler {
             if ("subscribe".equals(msg.getAction())) {
                 taskSubscribers.computeIfAbsent(msg.getTaskId(), k -> ConcurrentHashMap.newKeySet()).add(session);
                 log.info("用户订阅任务: taskId={}, sessionId={}", msg.getTaskId(), session.getId());
+
+                // 如果任务已完成或失败，立即推送缓存结果
+                sendCachedResultIfDone(msg.getTaskId(), session);
             } else if ("unsubscribe".equals(msg.getAction())) {
                 Set<WebSocketSession> sessions = taskSubscribers.get(msg.getTaskId());
                 if (sessions != null) {
@@ -116,6 +126,38 @@ public class TaskWebSocketHandler extends TextWebSocketHandler {
         }
 
         log.info("已推送任务更新: taskId={}, status={}, 推送{}个连接", taskId, notification.getStatus(), sessions.size());
+    }
+
+    private void sendCachedResultIfDone(Long taskId, WebSocketSession session) {
+        AiTaskEntity task = taskMapper.selectById(taskId);
+        if (task == null) return;
+
+        if ("COMPLETED".equals(task.getStatus())) {
+            String minioUrl = minioUtil.getUrl(task.getObjectName());
+            TaskNotification notification = new TaskNotification();
+            notification.setTaskId(taskId);
+            notification.setStatus("COMPLETED");
+            notification.setImageUrl(minioUrl);
+            notification.setRevisedPrompt(task.getRevisedPrompt());
+            sendToSession(session, notification);
+            log.info("subscribe 时推送已完成任务: taskId={}", taskId);
+        } else if ("FAILED".equals(task.getStatus())) {
+            TaskNotification notification = new TaskNotification();
+            notification.setTaskId(taskId);
+            notification.setStatus("FAILED");
+            notification.setErrorMessage(task.getErrorMessage());
+            sendToSession(session, notification);
+            log.info("subscribe 时推送已失败任务: taskId={}", taskId);
+        }
+    }
+
+    private void sendToSession(WebSocketSession session, TaskNotification notification) {
+        try {
+            String json = objectMapper.writeValueAsString(notification);
+            session.sendMessage(new TextMessage(json));
+        } catch (Exception e) {
+            log.error("推送消息失败: sessionId={}", session.getId(), e);
+        }
     }
 
     private String extractToken(WebSocketSession session) {

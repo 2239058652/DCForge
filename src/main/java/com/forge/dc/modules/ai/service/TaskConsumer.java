@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -48,7 +51,11 @@ public class TaskConsumer {
             if ("text2img".equals(message.getType())) {
                 response = agnesApiClient.generateImage(message.getPrompt(), message.getSize(), true);
             } else {
-                response = agnesApiClient.imageToImage(message.getPrompt(), message.getSize(), message.getImages(), true);
+                // 图生图：兼容 URL 和 base64 两种格式
+                List<String> base64Images = message.getImages().stream()
+                        .map(this::toBase64)
+                        .collect(Collectors.toList());
+                response = agnesApiClient.imageToImage(message.getPrompt(), message.getSize(), base64Images, true);
             }
 
             // 3. 获取生成结果
@@ -118,6 +125,25 @@ public class TaskConsumer {
         } catch (Exception e) {
             throw new RuntimeException("下载图片失败: " + e.getMessage());
         }
+    }
+
+    /**
+     * 将图片字符串转为 base64
+     * 兼容两种格式：
+     * - URL（新格式）：下载后转 base64
+     * - base64（旧格式）：直接返回
+     */
+    private String toBase64(String image) {
+        if (image == null || image.isEmpty()) {
+            return image;
+        }
+        // 如果是 URL，下载后转 base64
+        if (image.startsWith("http://") || image.startsWith("https://")) {
+            byte[] bytes = downloadFromUrl(image);
+            return Base64.getEncoder().encodeToString(bytes);
+        }
+        // 否则认为是 base64，直接返回
+        return image;
     }
 
     private String inferExtension(String url) {

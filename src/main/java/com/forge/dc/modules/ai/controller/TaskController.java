@@ -37,4 +37,11 @@ public class TaskController {
     public Result<PageResult<TaskVO>> page(@Valid TaskPageDTO dto) {
         return Result.success(taskService.page(dto));
     }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "删除任务记录")
+    public Result<Void> delete(@PathVariable Long id) {
+        taskService.delete(id);
+        return Result.success();
+    }
 }

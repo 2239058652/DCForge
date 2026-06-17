@@ -33,7 +33,8 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
             "/swagger-ui.html",
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/admin/**"   // 管理接口走 @PreAuthorize，不走动态规则
+            "/admin/**",   // 管理接口走 @PreAuthorize，不走动态规则
+            "/ws/**"       // WebSocket 走自己的 token 认证，不走接口权限
     );
 
     private final InterfacePermissionRuleLoader ruleLoader;
