@@ -53,7 +53,7 @@ export function copyToClipboard(text: string): Promise<void> {
 }
 
 // 格式化日期时间，返回 'YYYY年MM月DD日 HH:mm' 格式的字符串,默认格式为 'YYYY年MM月DD日 HH:mm',可以传入自定义格式
-export const formatDateTime = (isoString: string, format: string = 'YYYY.MM.DD HH:mm'): string => {
+export const formatDateTime = (isoString: string, format: string = 'YYYY.MM.DD HH:mm:ss'): string => {
     if (!isoString) return ''
     return dayjs(isoString).format(format)
 }

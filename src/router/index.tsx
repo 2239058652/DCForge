@@ -9,6 +9,9 @@ import StaffManagement from '@/views/StaffManagement'
 import System from '@/views/System'
 import Users from '@/views/Users'
 import Dictionary from '@/views/Dictionary'
+import Claude from '@/views/Claude'
+import ClaudeConversations from '@/views/Claude/Conversations'
+import ClaudeConversationDetail from '@/views/Claude/ConversationDetail'
 import AiImage from '@/views/AiImage'
 import ImageHistory from '@/views/ImageHistory'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
@@ -87,6 +90,46 @@ export const routeConfig = processRoutes([
                         meta: {
                             title: '图片历史',
                             requiredAuth: true
+                        }
+                    }
+                ]
+            },
+            {
+                path: 'machine',
+                name: 'machine',
+                meta: {
+                    title: '本机管理',
+                    requiredAuth: true
+                },
+                children: [
+                    {
+                        path: '',
+                        element: <Navigate to="/machine/claude" replace />
+                    },
+                    {
+                        path: 'claude',
+                        element: <Claude />,
+                        meta: {
+                            title: 'Claude管理',
+                            requiredAuth: true
+                        }
+                    },
+                    {
+                        path: 'claude/:projectDirName/conversations',
+                        element: <ClaudeConversations />,
+                        meta: {
+                            title: '对话列表',
+                            requiredAuth: true,
+                            hidden: true
+                        }
+                    },
+                    {
+                        path: 'claude/:projectDirName/conversations/:sessionId',
+                        element: <ClaudeConversationDetail />,
+                        meta: {
+                            title: '对话详情',
+                            requiredAuth: true,
+                            hidden: true
                         }
                     }
                 ]
