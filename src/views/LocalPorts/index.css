@@ -1,0 +1,217 @@
+.local-ports-page {
+    height: calc(100vh - 60px - 34px);
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.local-ports-card {
+    height: 100%;
+    max-width: 1440px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 12px 34px rgba(15, 23, 42, 0.05);
+}
+
+.local-ports-hero {
+    padding: 22px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    color: #ffffff;
+    background: #111827;
+}
+
+.local-ports-kicker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fde68a;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.local-ports-title {
+    margin: 8px 0 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.local-ports-desc {
+    margin-top: 8px;
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+.local-ports-stats {
+    display: grid;
+    grid-template-columns: 110px;
+    gap: 12px;
+}
+
+.local-ports-stat {
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.local-ports-stat-label {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.local-ports-stat-value {
+    margin-top: 6px;
+    color: #fde68a;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.local-ports-content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 24px 24px;
+}
+
+.local-ports-content .ant-table-wrapper {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+}
+
+.local-ports-pagination {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 16px;
+}
+
+.local-ports-toolbar {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.local-ports-filters {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.local-ports-switch-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #475569;
+}
+
+.local-ports-toolbar-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* Protocol tags */
+.port-protocol-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #334155;
+}
+
+/* State tags */
+.port-state-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.port-state-listen {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.port-state-established {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.port-state-timewait {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.port-state-closewait {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+/* Terminate confirm modal */
+.terminate-confirm-content {
+    padding-top: 12px;
+}
+
+.terminate-confirm-warning {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.terminate-confirm-details {
+    margin-top: 16px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.terminate-detail-row {
+    display: flex;
+    padding: 4px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.terminate-detail-row:last-child {
+    border-bottom: none;
+}
+
+.terminate-detail-label {
+    width: 90px;
+    flex-shrink: 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.terminate-detail-value {
+    color: #1e293b;
+    font-size: 13px;
+    font-weight: 500;
+    word-break: break-all;
+    white-space: pre-wrap;
+}
+
+@media (max-width: 1024px) {
+    .local-ports-hero {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .local-ports-stats {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

@@ -14,6 +14,7 @@ import ClaudeConversations from '@/views/Claude/Conversations'
 import ClaudeConversationDetail from '@/views/Claude/ConversationDetail'
 import AiImage from '@/views/AiImage'
 import ImageHistory from '@/views/ImageHistory'
+import LocalPorts from '@/views/LocalPorts'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 
 export const routeConfig = processRoutes([
@@ -105,6 +106,14 @@ export const routeConfig = processRoutes([
                     {
                         path: '',
                         element: <Navigate to="/machine/claude" replace />
+                    },
+                    {
+                        path: 'local-ports',
+                        element: <LocalPorts />,
+                        meta: {
+                            title: '本机端口',
+                            requiredAuth: true
+                        }
                     },
                     {
                         path: 'claude',
