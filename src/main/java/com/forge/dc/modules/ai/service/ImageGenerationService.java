@@ -6,7 +6,7 @@ import com.forge.dc.modules.ai.vo.ImageGenerationVO;
 
 public interface ImageGenerationService {
 
-    ImageGenerationVO textToImage(TextToImageDTO dto);
+    ImageGenerationVO textToImage(TextToImageDTO dto) throws java.io.IOException;
 
-    ImageGenerationVO imageToImage(ImageToImageDTO dto);
+    ImageGenerationVO imageToImage(ImageToImageDTO dto) throws java.io.IOException;
 }

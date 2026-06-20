@@ -30,13 +30,21 @@ public class ImageGenerationController {
     @PostMapping("/text-to-image")
     @Operation(summary = "文生图")
     public Result<ImageGenerationVO> textToImage(@RequestBody @Valid TextToImageDTO dto) {
-        return Result.success(imageGenerationService.textToImage(dto));
+        try {
+            return Result.success(imageGenerationService.textToImage(dto));
+        } catch (java.io.IOException e) {
+            return Result.fail(ResultCode.SYSTEM_ERROR, "AI 服务调用失败: " + e.getMessage());
+        }
     }
 
     @PostMapping("/image-to-image")
     @Operation(summary = "图生图")
     public Result<ImageGenerationVO> imageToImage(@RequestBody @Valid ImageToImageDTO dto) {
-        return Result.success(imageGenerationService.imageToImage(dto));
+        try {
+            return Result.success(imageGenerationService.imageToImage(dto));
+        } catch (java.io.IOException e) {
+            return Result.fail(ResultCode.SYSTEM_ERROR, "AI 服务调用失败: " + e.getMessage());
+        }
     }
 
     @PostMapping("/upload")

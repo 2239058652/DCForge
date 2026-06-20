@@ -50,57 +50,49 @@ public class AgnesApiClient {
         return httpClient;
     }
 
-    public AgnesImageResponse generateImage(String prompt, String size, boolean returnUrl) {
-        try {
-            ObjectNode body = objectMapper.createObjectNode();
-            body.put("model", model);
-            body.put("prompt", prompt);
-            body.put("size", size);
+    public AgnesImageResponse generateImage(String prompt, String size, boolean returnUrl) throws IOException {
+        ObjectNode body = objectMapper.createObjectNode();
+        body.put("model", model);
+        body.put("prompt", prompt);
+        body.put("size", size);
 
-            if (returnUrl) {
-                ObjectNode extraBody = objectMapper.createObjectNode();
-                extraBody.put("response_format", "url");
-                body.set("extra_body", extraBody);
-            } else {
-                body.put("return_base64", true);
-            }
-
-            return doPost(body);
-        } catch (Exception e) {
-            log.error("Agnes AI 文生图调用失败: {}", e.getMessage(), e);
-            throw new RuntimeException("图像生成失败: " + e.getMessage(), e);
+        if (returnUrl) {
+            ObjectNode extraBody = objectMapper.createObjectNode();
+            extraBody.put("response_format", "url");
+            body.set("extra_body", extraBody);
+        } else {
+            body.put("return_base64", true);
         }
+
+        return doPost(body);
     }
 
-    public AgnesImageResponse imageToImage(String prompt, String size, List<String> images, boolean returnUrl) {
-        try {
-            ObjectNode body = objectMapper.createObjectNode();
-            body.put("model", model);
-            body.put("prompt", prompt);
-            body.put("size", size);
+    public AgnesImageResponse imageToImage(String prompt, String size, List<String> images, boolean returnUrl) throws IOException {
+        ObjectNode body = objectMapper.createObjectNode();
+        body.put("model", model);
+        body.put("prompt", prompt);
+        body.put("size", size);
 
-            ObjectNode extraBody = objectMapper.createObjectNode();
-            ArrayNode imageArray = extraBody.putArray("image");
-            images.forEach(imageArray::add);
+        ObjectNode extraBody = objectMapper.createObjectNode();
+        ArrayNode imageArray = extraBody.putArray("image");
+        images.forEach(imageArray::add);
 
-            if (returnUrl) {
-                extraBody.put("response_format", "url");
-            } else {
-                extraBody.put("response_format", "b64_json");
-            }
-
-            body.set("extra_body", extraBody);
-
-            return doPost(body);
-        } catch (Exception e) {
-            log.error("Agnes AI 图生图调用失败: {}", e.getMessage(), e);
-            throw new RuntimeException("图像生成失败: " + e.getMessage(), e);
+        if (returnUrl) {
+            extraBody.put("response_format", "url");
+        } else {
+            extraBody.put("response_format", "b64_json");
         }
+
+        body.set("extra_body", extraBody);
+
+        return doPost(body);
     }
 
     private AgnesImageResponse doPost(ObjectNode body) throws IOException {
         String jsonBody = objectMapper.writeValueAsString(body);
-        log.info("Agnes AI 请求: {}", jsonBody);
+        log.info("Agnes AI 请求: model={}, hasImages={}",
+                body.path("model").asText(),
+                body.path("extra_body").path("image").isArray());
 
         Request request = new Request.Builder()
                 .url(baseUrl + "/v1/images/generations")
@@ -111,10 +103,13 @@ public class AgnesApiClient {
 
         try (Response response = getClient().newCall(request).execute()) {
             String responseBody = response.body() != null ? response.body().string() : "";
-            log.info("Agnes AI 响应状态: {}, body: {}", response.code(), responseBody);
+            log.info("Agnes AI 响应状态: {}", response.code());
 
-            if (!response.isSuccessful()) {
-                throw new RuntimeException("Agnes AI 返回错误状态 " + response.code() + ": " + responseBody);
+            if (response.code() >= 500 || response.code() == 429) {
+                throw new IOException("Agnes AI 服务端错误: HTTP " + response.code());
+            }
+            if (response.code() != 200) {
+                throw new IllegalStateException("Agnes AI 请求错误 " + response.code() + ": " + responseBody);
             }
 
             return objectMapper.readValue(responseBody, AgnesImageResponse.class);

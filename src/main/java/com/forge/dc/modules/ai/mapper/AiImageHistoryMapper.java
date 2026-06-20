@@ -20,4 +20,7 @@ public interface AiImageHistoryMapper {
 
     @Delete("DELETE FROM ai_image_history WHERE id = #{id} AND user_id = #{userId}")
     int deleteByIdAndUserId(@Param("id") Long id, @Param("userId") Long userId);
+
+    @Select("SELECT COUNT(*) FROM ai_image_history WHERE object_name = #{objectName} AND user_id = #{userId}")
+    int countByObjectName(@Param("objectName") String objectName, @Param("userId") Long userId);
 }

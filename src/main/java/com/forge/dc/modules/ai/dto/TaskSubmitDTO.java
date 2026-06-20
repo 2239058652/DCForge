@@ -1,6 +1,7 @@
 package com.forge.dc.modules.ai.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
 public class TaskSubmitDTO {
 
     @NotBlank(message = "type 不能为空")
+    @Pattern(regexp = "^(text2img|img2img)$", message = "type 必须为 text2img 或 img2img")
     private String type;
 
     @NotBlank(message = "prompt 不能为空")

@@ -17,7 +17,7 @@ public class ImageGenerationServiceImpl implements ImageGenerationService {
     private final AgnesApiClient agnesApiClient;
 
     @Override
-    public ImageGenerationVO textToImage(TextToImageDTO dto) {
+    public ImageGenerationVO textToImage(TextToImageDTO dto) throws java.io.IOException {
         AgnesApiClient.AgnesImageResponse response = agnesApiClient.generateImage(
                 dto.getPrompt(), dto.getSize(), true);
 
@@ -30,7 +30,7 @@ public class ImageGenerationServiceImpl implements ImageGenerationService {
     }
 
     @Override
-    public ImageGenerationVO imageToImage(ImageToImageDTO dto) {
+    public ImageGenerationVO imageToImage(ImageToImageDTO dto) throws java.io.IOException {
         AgnesApiClient.AgnesImageResponse response = agnesApiClient.imageToImage(
                 dto.getPrompt(), dto.getSize(), dto.getImages(), true);
 

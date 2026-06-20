@@ -63,3 +63,6 @@ agnes:
   base-url: "https://apihub.agnes-ai.com"
   model: "agnes-image-2.1-flash"
   timeout: 360
+
+claude:
+  base-path: "C:\\Users\\22390\\.claude"

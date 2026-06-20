@@ -63,8 +63,14 @@ public class TaskWebSocketHandler extends TextWebSocketHandler {
 
         if (msg.getTaskId() != null) {
             if ("subscribe".equals(msg.getAction())) {
+                Long userId = (Long) session.getAttributes().get("userId");
+                AiTaskEntity task = taskMapper.selectById(msg.getTaskId());
+                if (task == null || !userId.equals(task.getUserId())) {
+                    log.warn("用户尝试订阅不属于自己的任务: userId={}, taskId={}", userId, msg.getTaskId());
+                    return;
+                }
                 taskSubscribers.computeIfAbsent(msg.getTaskId(), k -> ConcurrentHashMap.newKeySet()).add(session);
-                log.info("用户订阅任务: taskId={}, sessionId={}", msg.getTaskId(), session.getId());
+                log.info("用户订阅任务: taskId={}, userId={}", msg.getTaskId(), userId);
 
                 // 如果任务已完成或失败，立即推送缓存结果
                 sendCachedResultIfDone(msg.getTaskId(), session);

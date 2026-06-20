@@ -34,6 +34,9 @@ public interface AiTaskMapper {
 
     List<AiTaskEntity> selectPage(@Param("userId") Long userId, @Param("status") String status);
 
+    @Select("SELECT * FROM ai_task WHERE object_name = #{objectName} AND user_id = #{userId} LIMIT 1")
+    AiTaskEntity selectByObjectName(@Param("objectName") String objectName, @Param("userId") Long userId);
+
     @Delete("DELETE FROM ai_task WHERE id = #{id}")
     int deleteById(@Param("id") Long id);
 }

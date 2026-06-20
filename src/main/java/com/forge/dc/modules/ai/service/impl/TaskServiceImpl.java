@@ -10,6 +10,7 @@ import com.forge.dc.modules.ai.dto.TaskMessage;
 import com.forge.dc.modules.ai.dto.TaskPageDTO;
 import com.forge.dc.modules.ai.dto.TaskSubmitDTO;
 import com.forge.dc.modules.ai.entity.AiTaskEntity;
+import com.forge.dc.modules.ai.mapper.AiImageHistoryMapper;
 import com.forge.dc.modules.ai.mapper.AiTaskMapper;
 import com.forge.dc.modules.ai.service.TaskProducer;
 import com.forge.dc.modules.ai.service.TaskService;
@@ -31,6 +32,7 @@ import java.util.List;
 public class TaskServiceImpl implements TaskService {
 
     private final AiTaskMapper taskMapper;
+    private final AiImageHistoryMapper imageHistoryMapper;
     private final TaskProducer taskProducer;
     private final MinioUtil minioUtil;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -38,6 +40,13 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskVO submit(TaskSubmitDTO dto) {
         Long userId = getCurrentUserId();
+
+        if ("img2img".equals(dto.getType())) {
+            if (dto.getImages() == null || dto.getImages().isEmpty()
+                    || dto.getImages().stream().allMatch(s -> s == null || s.isBlank())) {
+                throw new BusinessException(ResultCode.BAD_REQUEST.getCode(), "图生图必须提供输入图片");
+            }
+        }
 
         AiTaskEntity entity = new AiTaskEntity();
         entity.setUserId(userId);
@@ -110,13 +119,18 @@ public class TaskServiceImpl implements TaskService {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "任务不存在");
         }
 
-        // 删除 MinIO 上的图片文件
+        // 删除 MinIO 上的图片文件（仅当无历史记录引用时）
         if (entity.getObjectName() != null && !entity.getObjectName().isEmpty()) {
-            try {
-                minioUtil.delete(entity.getObjectName());
-                log.info("已删除 MinIO 文件: {}", entity.getObjectName());
-            } catch (Exception e) {
-                log.warn("删除 MinIO 文件失败: {}, 继续删除数据库记录", entity.getObjectName(), e);
+            int refCount = imageHistoryMapper.countByObjectName(entity.getObjectName(), userId);
+            if (refCount == 0) {
+                try {
+                    minioUtil.delete(entity.getObjectName());
+                    log.info("已删除 MinIO 文件: {}", entity.getObjectName());
+                } catch (Exception e) {
+                    log.warn("删除 MinIO 文件失败: {}, 继续删除数据库记录", entity.getObjectName(), e);
+                }
+            } else {
+                log.info("MinIO 文件被 {} 条历史记录引用，保留: {}", refCount, entity.getObjectName());
             }
         }
 

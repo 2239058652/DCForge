@@ -61,7 +61,11 @@ public class ImageHistoryServiceImpl implements ImageHistoryService {
         entity.setCreatedAt(LocalDateTime.now());
 
         if (dto.getSourceImageUrls() != null && !dto.getSourceImageUrls().isEmpty()) {
-            entity.setSourceImageUrl(String.join(",", dto.getSourceImageUrls()));
+            // Data URI base64 太长，只保留 URL 部分或截断标记
+            List<String> urls = dto.getSourceImageUrls().stream()
+                    .map(url -> url.startsWith("data:") ? "[base64 image]" : url)
+                    .toList();
+            entity.setSourceImageUrl(String.join(",", urls));
         }
 
         imageHistoryMapper.insert(entity);
@@ -104,10 +108,18 @@ public class ImageHistoryServiceImpl implements ImageHistoryService {
             throw new BusinessException(ResultCode.NOT_FOUND.getCode(), "历史记录不存在");
         }
 
-        try {
-            minioUtil.delete(entity.getObjectName());
-        } catch (Exception e) {
-            log.warn("删除 MinIO 文件失败: {}, 继续删除数据库记录", entity.getObjectName(), e);
+        // 删除 MinIO 文件（仅当任务不再引用时）
+        if (entity.getObjectName() != null && !entity.getObjectName().isEmpty()) {
+            AiTaskEntity task = aiTaskMapper.selectByObjectName(entity.getObjectName(), userId);
+            if (task == null) {
+                try {
+                    minioUtil.delete(entity.getObjectName());
+                } catch (Exception e) {
+                    log.warn("删除 MinIO 文件失败: {}, 继续删除数据库记录", entity.getObjectName(), e);
+                }
+            } else {
+                log.info("任务仍引用 MinIO 文件，保留: {}", entity.getObjectName());
+            }
         }
 
         imageHistoryMapper.deleteByIdAndUserId(id, userId);

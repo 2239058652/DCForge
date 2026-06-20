@@ -13,11 +13,11 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -52,9 +52,10 @@ public class TaskConsumer {
                 response = agnesApiClient.generateImage(message.getPrompt(), message.getSize(), true);
             } else {
                 // 图生图：兼容 URL 和 base64 两种格式
-                List<String> base64Images = message.getImages().stream()
-                        .map(this::toBase64)
-                        .collect(Collectors.toList());
+                List<String> base64Images = new java.util.ArrayList<>();
+                for (String img : message.getImages()) {
+                    base64Images.add(toBase64(img));
+                }
                 response = agnesApiClient.imageToImage(message.getPrompt(), message.getSize(), base64Images, true);
             }
 
@@ -85,12 +86,20 @@ public class TaskConsumer {
     }
 
     private void handleFailure(Long taskId, TaskMessage message, Exception e) {
+        if (!(e instanceof java.io.IOException)) {
+            String errorMsg = "请求错误(不可重试): " + e.getMessage();
+            taskMapper.updateError(taskId, errorMsg, LocalDateTime.now());
+            notifyFrontend(taskId, "FAILED", null, null, errorMsg);
+            log.error("任务不可重试失败: taskId={}, error={}", taskId, e.getMessage());
+            throw new AmqpRejectAndDontRequeueException(errorMsg);
+        }
+
         AiTaskEntity task = taskMapper.selectById(taskId);
         int retryCount = task != null ? task.getRetryCount() : 0;
 
         if (retryCount < 3) {
             taskMapper.incrementRetryCount(taskId);
-            log.info("任务将重试: taskId={}, retryCount={}", taskId, retryCount + 1);
+            log.info("任务将重试: taskId={}, retryCount={}, error={}", taskId, retryCount + 1, e.getMessage());
             throw new RuntimeException("任务处理失败，等待重试: " + e.getMessage());
         } else {
             String errorMsg = "重试" + retryCount + "次后失败: " + e.getMessage();
@@ -111,39 +120,80 @@ public class TaskConsumer {
         webSocketHandler.notifyTaskUpdate(taskId, notification);
     }
 
-    private byte[] downloadFromUrl(String url) {
+    private static final long MAX_DOWNLOAD_SIZE = 50 * 1024 * 1024;
+
+    private byte[] downloadFromUrl(String url) throws IOException {
         try {
-            java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
-            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .build();
-            java.net.http.HttpResponse<byte[]> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofByteArray());
-            if (response.statusCode() != 200) {
-                throw new RuntimeException("下载图片失败: HTTP " + response.statusCode());
+            URI uri = URI.create(url);
+            String scheme = uri.getScheme();
+            if (!"http".equals(scheme) && !"https".equals(scheme)) {
+                throw new IllegalArgumentException("不支持的协议: " + scheme);
             }
-            return response.body();
+
+            java.net.http.HttpClient client = java.net.http.HttpClient.newBuilder()
+                    .connectTimeout(java.time.Duration.ofSeconds(30))
+                    .build();
+            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                    .uri(uri)
+                    .timeout(java.time.Duration.ofSeconds(60))
+                    .build();
+            java.net.http.HttpResponse<byte[]> response = client.send(request,
+                    java.net.http.HttpResponse.BodyHandlers.ofByteArray());
+            int statusCode = response.statusCode();
+            if (statusCode >= 500) {
+                throw new IOException("服务端错误: HTTP " + statusCode);
+            }
+            if (statusCode != 200) {
+                throw new IllegalStateException("下载图片失败: HTTP " + statusCode);
+            }
+            byte[] body = response.body();
+            if (body.length > MAX_DOWNLOAD_SIZE) {
+                throw new IllegalStateException("图片过大: " + body.length + " bytes");
+            }
+            return body;
+        } catch (IOException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException("下载图片失败: " + e.getMessage());
+            throw new RuntimeException("下载图片失败: " + e.getMessage(), e);
         }
     }
 
     /**
-     * 将图片字符串转为 base64
+     * 将图片字符串转为 Data URI base64
      * 兼容两种格式：
-     * - URL（新格式）：下载后转 base64
-     * - base64（旧格式）：直接返回
+     * - URL（新格式）：下载后转 data:image/...;base64,xxx
+     * - base64/Data URI（旧格式）：直接返回
      */
-    private String toBase64(String image) {
+    private String toBase64(String image) throws IOException {
         if (image == null || image.isEmpty()) {
             return image;
         }
-        // 如果是 URL，下载后转 base64
+        // 如果已经是 Data URI，直接返回
+        if (image.startsWith("data:image/")) {
+            return image;
+        }
+        // 如果是 URL，下载后转 Data URI
         if (image.startsWith("http://") || image.startsWith("https://")) {
             byte[] bytes = downloadFromUrl(image);
-            return Base64.getEncoder().encodeToString(bytes);
+            String ext = inferExtensionFromBytes(bytes);
+            return "data:image/" + ext + ";base64," + Base64.getEncoder().encodeToString(bytes);
         }
-        // 否则认为是 base64，直接返回
-        return image;
+        // 否则认为是裸 base64，添加 Data URI 前缀（默认 png）
+        return "data:image/png;base64," + image;
+    }
+
+    private String inferExtensionFromBytes(byte[] bytes) {
+        if (bytes.length >= 8) {
+            // PNG: 89 50 4E 47
+            if (bytes[0] == (byte) 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47) return "png";
+            // JPEG: FF D8 FF
+            if (bytes[0] == (byte) 0xFF && bytes[1] == (byte) 0xD8 && bytes[2] == (byte) 0xFF) return "jpeg";
+            // WEBP: RIFF....WEBP
+            if (bytes[0] == 0x52 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x46) return "webp";
+            // GIF: 47 49 46 38
+            if (bytes[0] == 0x47 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x38) return "gif";
+        }
+        return "png";
     }
 
     private String inferExtension(String url) {
