@@ -2,6 +2,7 @@ import request from '@/request'
 import type { ApiResult } from '@/api/user'
 
 export type PortProtocol = 'tcp' | 'udp'
+export type ProtocolFilter = 'all' | PortProtocol
 
 export interface LocalPortItem {
     protocol: 'tcp' | 'udp'

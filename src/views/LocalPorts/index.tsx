@@ -2,7 +2,7 @@ import { Icon } from '@iconify/react'
 import { App, Button, Empty, Input, InputNumber, Modal, Pagination, Select, Switch, Table, Tooltip } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { localPortsApi, type LocalPortItem, type PortProtocol } from '@/api/localPorts'
+import { localPortsApi, type LocalPortItem, type ProtocolFilter } from '@/api/localPorts'
 import './index.css'
 
 const fuzzyMatch = (text: string, keyword: string): boolean => {
@@ -15,7 +15,7 @@ const fuzzyMatch = (text: string, keyword: string): boolean => {
     return ki === lowerKw.length
 }
 
-const protocolOptions: { label: string; value: PortProtocol }[] = [
+const protocolOptions: { label: string; value: ProtocolFilter }[] = [
     { label: '全部', value: 'all' },
     { label: 'TCP', value: 'tcp' },
     { label: 'UDP', value: 'udp' }
@@ -53,7 +53,7 @@ const LocalPorts = () => {
     const [pageSize, setPageSize] = useState(20)
 
     // 筛选草稿（用户正在编辑，未提交）
-    const [draftProtocol, setDraftProtocol] = useState<PortProtocol>('all')
+    const [draftProtocol, setDraftProtocol] = useState<ProtocolFilter>('all')
     const [draftState, setDraftState] = useState<string>('')
     const [draftPortInput, setDraftPortInput] = useState<number | undefined>(undefined)
     const [draftKeyword, setDraftKeyword] = useState('')
@@ -61,7 +61,7 @@ const LocalPorts = () => {
 
     // 已提交的筛选条件（点查询后才生效）
     const [appliedFilters, setAppliedFilters] = useState({
-        protocol: 'all' as PortProtocol,
+        protocol: 'all' as ProtocolFilter,
         state: '',
         portInput: undefined as number | undefined,
         keyword: '',
