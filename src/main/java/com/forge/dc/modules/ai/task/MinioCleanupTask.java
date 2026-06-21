@@ -1,6 +1,7 @@
 package com.forge.dc.modules.ai.task;
 
 import com.forge.dc.common.util.MinioUtil;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,11 @@ public class MinioCleanupTask {
 
     private final MinioUtil minioUtil;
 
+    /**
+     * -- GETTER --
+     * 获取当前配置的 cron 表达式
+     */
+    @Getter
     @Value("${minio.cleanup.cron:0 0 2 * * ?}")
     private String cronExpression;
 
@@ -45,10 +51,4 @@ public class MinioCleanupTask {
         cleanupTempImages();
     }
 
-    /**
-     * 获取当前配置的 cron 表达式
-     */
-    public String getCronExpression() {
-        return cronExpression;
-    }
 }
