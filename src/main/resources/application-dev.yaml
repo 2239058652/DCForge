@@ -63,6 +63,11 @@ agnes:
   base-url: "https://apihub.agnes-ai.com"
   model: "agnes-image-2.1-flash"
   timeout: 360
+  chat:
+    api-key: "sk-gcFAoBnqT9QSykK31g080IAE1bOxHGEi3qECfSmdrWS6POr4"
+    base-url: "https://apihub.agnes-ai.com"
+    model: "agnes-2.0-flash"
+    timeout: 120
 
 claude:
   base-path: "C:\\Users\\22390\\.claude"
