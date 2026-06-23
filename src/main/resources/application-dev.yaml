@@ -68,6 +68,10 @@ agnes:
     base-url: "https://apihub.agnes-ai.com"
     model: "agnes-2.0-flash"
     timeout: 120
+  proxy:
+    enabled: true
+    anthropic-version: "2023-06-01"
+    stream-timeout: 1800
 
 claude:
   base-path: "C:\\Users\\22390\\.claude"

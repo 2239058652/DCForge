@@ -39,7 +39,11 @@ public class ChatCompletionServiceImpl implements ChatCompletionService {
     @Value("${agnes.chat.timeout:120}")
     private int chatTimeout;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    public ChatCompletionServiceImpl(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
     private volatile OkHttpClient httpClient;
 
     private OkHttpClient getClient() {
@@ -225,11 +229,23 @@ public class ChatCompletionServiceImpl implements ChatCompletionService {
             }
             ObjectNode msgNode = objectMapper.createObjectNode();
             msgNode.put("role", msg.getRole());
+            if (msg.getToolCallId() != null && !msg.getToolCallId().isBlank()) {
+                msgNode.put("tool_call_id", msg.getToolCallId());
+            }
 
             if (msg.getContent() instanceof String) {
                 msgNode.put("content", (String) msg.getContent());
+            } else if (msg.getContent() == null) {
+                if (msg.getToolCalls() != null && !msg.getToolCalls().isNull()) {
+                    msgNode.putNull("content");
+                } else {
+                    msgNode.put("content", "");
+                }
             } else {
                 msgNode.set("content", objectMapper.valueToTree(msg.getContent()));
+            }
+            if (msg.getToolCalls() != null && !msg.getToolCalls().isNull()) {
+                msgNode.set("tool_calls", msg.getToolCalls());
             }
 
             messagesArray.add(msgNode);
@@ -243,6 +259,18 @@ public class ChatCompletionServiceImpl implements ChatCompletionService {
         }
         if (request.getMaxTokens() != null) {
             body.put("max_tokens", request.getMaxTokens());
+        }
+        if (request.getTools() != null && !request.getTools().isNull()) {
+            body.set("tools", request.getTools());
+        }
+        if (request.getToolChoice() != null && !request.getToolChoice().isNull()) {
+            body.set("tool_choice", request.getToolChoice());
+        }
+        if (request.getStop() != null && !request.getStop().isNull()) {
+            body.set("stop", request.getStop());
+        }
+        if (request.getChatTemplateKwargs() != null && !request.getChatTemplateKwargs().isNull()) {
+            body.set("chat_template_kwargs", request.getChatTemplateKwargs());
         }
         body.put("stream", stream);
 
@@ -266,11 +294,23 @@ public class ChatCompletionServiceImpl implements ChatCompletionService {
         for (ChatMessageDTO msg : request.getMessages()) {
             ObjectNode msgNode = objectMapper.createObjectNode();
             msgNode.put("role", msg.getRole());
+            if (msg.getToolCallId() != null && !msg.getToolCallId().isBlank()) {
+                msgNode.put("tool_call_id", msg.getToolCallId());
+            }
 
             if (msg.getContent() instanceof String) {
                 msgNode.put("content", (String) msg.getContent());
+            } else if (msg.getContent() == null) {
+                if (msg.getToolCalls() != null && !msg.getToolCalls().isNull()) {
+                    msgNode.putNull("content");
+                } else {
+                    msgNode.put("content", "");
+                }
             } else {
                 msgNode.set("content", objectMapper.valueToTree(msg.getContent()));
+            }
+            if (msg.getToolCalls() != null && !msg.getToolCalls().isNull()) {
+                msgNode.set("tool_calls", msg.getToolCalls());
             }
 
             messagesArray.add(msgNode);

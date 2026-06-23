@@ -2,6 +2,7 @@ package com.forge.dc.modules.ai.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 
 import java.util.List;
@@ -29,6 +30,8 @@ public class ChatCompletionResponseDTO {
     public static class Message {
         private String role;
         private String content;
+        @JsonProperty("tool_calls")
+        private JsonNode toolCalls;
     }
 
     @Data

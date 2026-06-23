@@ -8,10 +8,13 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.context.request.async.TimeoutCallableProcessingInterceptor;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableMethodSecurity
-public class SecurityConfig {
+public class SecurityConfig implements WebMvcConfigurer {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final DynamicAuthorizationFilter dynamicAuthorizationFilter;
@@ -43,7 +46,8 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/ws/**"
+                                "/ws/**",
+                                "/v1/**"  // Agnes Proxy 使用 x-api-key 认证
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -54,5 +58,14 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler)           // 处理权限不足
                 )
                 .build();
+    }
+
+    /**
+     * 配置异步请求超时时间（流式响应需要较长时间）
+     */
+    @Override
+    public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+        configurer.setDefaultTimeout(300_000); // 5分钟超时
+        configurer.registerCallableInterceptors(new TimeoutCallableProcessingInterceptor());
     }
 }

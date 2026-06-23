@@ -34,7 +34,8 @@ public class DynamicAuthorizationFilter extends OncePerRequestFilter {
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/admin/**",   // 管理接口走 @PreAuthorize，不走动态规则
-            "/ws/**"       // WebSocket 走自己的 token 认证，不走接口权限
+            "/ws/**",      // WebSocket 走自己的 token 认证，不走接口权限
+            "/v1/**"       // Agnes Proxy 使用 x-api-key 认证，不走 JWT 权限
     );
 
     private final InterfacePermissionRuleLoader ruleLoader;

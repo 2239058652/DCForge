@@ -2,6 +2,7 @@ package com.forge.dc.modules.ai.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -27,4 +28,14 @@ public class ChatCompletionRequestDTO {
     private Boolean stream;
 
     private String systemPrompt;
+
+    private JsonNode tools;
+
+    @JsonProperty("tool_choice")
+    private JsonNode toolChoice;
+
+    private JsonNode stop;
+
+    @JsonProperty("chat_template_kwargs")
+    private JsonNode chatTemplateKwargs;
 }
