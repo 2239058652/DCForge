@@ -15,6 +15,7 @@ import ClaudeConversationDetail from '@/views/Claude/ConversationDetail'
 import AiImage from '@/views/AiImage'
 import ImageHistory from '@/views/ImageHistory'
 import LocalPorts from '@/views/LocalPorts'
+import AiAssistant from '@/views/AiAssistant'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 
 export const routeConfig = processRoutes([
@@ -75,7 +76,15 @@ export const routeConfig = processRoutes([
                 children: [
                     {
                         path: '',
-                        element: <Navigate to="/ai/image" replace />
+                        element: <Navigate to="/ai/assistant" replace />
+                    },
+                    {
+                        path: 'assistant',
+                        element: <AiAssistant />,
+                        meta: {
+                            title: 'AI助手',
+                            requiredAuth: true
+                        }
                     },
                     {
                         path: 'image',

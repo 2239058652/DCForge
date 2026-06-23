@@ -95,6 +95,7 @@ body {
     flex: 1;
     overflow: auto;
     background: #eef3f9;
+    position: relative;
 }
 
 .app-footer {
